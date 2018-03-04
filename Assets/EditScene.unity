@@ -370,3 +370,9 @@ MonoBehaviour:
   _scale: 5
   _times: 5
   _freqTimes: 2
+  _varySpeed: {x: 0, y: 0}
+  _speedScaleMin: 0
+  _speedScaleMax: 0.01
+  _varyAcceleration: {x: 0, y: 0}
+  _accelerationScaleMin: 0.4
+  _accelerationScaleMax: 0.8
