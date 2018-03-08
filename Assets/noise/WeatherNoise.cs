@@ -36,6 +36,20 @@ public class WeatherNoise : MonoBehaviour
     [SerializeField]
     private float _accelerationScaleMax;
 
+    [SerializeField]
+    private float _tempShift;
+    [SerializeField]
+    private float _tempShiftMin;
+    [SerializeField]
+    private float _tempShiftMax;
+    [SerializeField]
+    private bool _goWarm;
+    [SerializeField]
+    private float _warmUpMax;
+    [SerializeField]
+    private float _coldDownMax;
+
+
     private int _width;
     private int _height;
     private float[] _weatherMap;
@@ -48,6 +62,9 @@ public class WeatherNoise : MonoBehaviour
         _yOffset = Random.Range(-10000f, 10000f);
         _varySpeed = new Vector2(Random.value * 2f - 1f, Random.value * 2f - 1f).normalized;
         _varyAcceleration = new Vector2(Random.value * 2f - 1f, Random.value * 2f - 1f).normalized;
+
+        _tempShift = Random.Range(_tempShiftMin, _tempShiftMax);
+        _goWarm = Random.value > 0.5f;
     }
     public void NextRandom()
     { 
@@ -57,6 +74,15 @@ public class WeatherNoise : MonoBehaviour
         var accerleration = _varyAcceleration * Random.Range(_accelerationScaleMin, _accelerationScaleMax);
         _varySpeed = (_varySpeed + accerleration).normalized;
         _varyAcceleration = new Vector2(Random.value*2f-1f, Random.value*2f-1f).normalized;
+         
+        if (_goWarm) {
+            _tempShift += Random.Range(_tempShiftMin, _tempShiftMax);
+            _goWarm = _tempShift < _warmUpMax;
+        }
+        else {
+            _tempShift -= Random.Range(_tempShiftMin, _tempShiftMax);
+            _goWarm = _tempShift < _coldDownMax;
+        }
     }
 
     public float[] MakeWeatherMap(int width, int height)
@@ -88,6 +114,7 @@ public class WeatherNoise : MonoBehaviour
     public void PassNextTurn() {
         NextRandom();
         MakeWeatherMap(_spriteView.Width, _spriteView.Height);
+        _tempratureChange();
         _SetColors();
         _spriteView.SetPixels(_colors);
     }
@@ -123,7 +150,24 @@ public class WeatherNoise : MonoBehaviour
         sample /= sampleTimes;
 
         return sample;
-    } 
+    }
+
+    private void _tempratureChange() {
+        
+        for (int x = 0; x < _width; x++) {
+            for (int y = 0; y < _height; y++) {
+                  
+                var sample = _weatherMap[ y * _width +  x];
+
+                if (_tempShift > 0) {
+                    _weatherMap[y * _width + x] = _tempShift + sample * (1 - _tempShift);
+                }
+                else {
+                    _weatherMap[y * _width + x] = sample * (1 + _tempShift);
+                }
+            }
+        }
+    }
 
     private Color[] _SetColors() {
         _colors = new Color[_spriteView.Total];

@@ -93,10 +93,16 @@ public class SpriteNoise : MonoBehaviour {
             _xOffset, _yOffset, _scale,
             _times, _freqTimes );
          
-        for (int i = 0; i < _upPoints.Count; i++) {
-            var point = _upPoints[i];
+        for (int i = 0; i < _upPoints.Count; i++)
+        {
+            var point = new Vector2(
+                _upPoints[i].x * _spriteView.Width,
+                _upPoints[i].y * _spriteView.Height);
+            var coord = new Vector2(
+                xCoord * _spriteView.Width,
+                yCoord * _spriteView.Height);
 
-            float distance = Vector2.Distance(point, new Vector2(xCoord, yCoord));
+            float distance = Vector2.Distance(point, coord);
             float upDegree = _radius - distance;
             sample += _upScale * Mathf.Pow(_upSpeed, upDegree);
         }

@@ -237,9 +237,9 @@ MonoBehaviour:
   _downOffset: 0.02
   _downSpeed: 2.05
   _upNums: 10
-  _radius: 0.01
-  _upScale: 0.05
-  _upSpeed: 1000
+  _radius: 30
+  _upScale: 0.15
+  _upSpeed: 1.03
   _upPoints: []
 --- !u!212 &1256473744
 SpriteRenderer:
@@ -312,9 +312,9 @@ MonoBehaviour:
   _spriteView: {fileID: 1256473747}
   _points: []
   _nums: 5
-  _radius: 0.01
-  _upScale: 0.05
-  _upSpeed: 1000
+  _radius: 30
+  _upScale: 0.15
+  _upSpeed: 1.03
   _countTimes: 20
   _minDistance: 0.1
   _speed: 0.01
@@ -338,21 +338,21 @@ MonoBehaviour:
   _grid: 20
   _terrains:
   - Grid: 0
-    Color: {r: 0, g: 0.046247423, b: 0.35294116, a: 1}
+    Color: {r: 0.08893815, g: 0.111006275, b: 0.25735295, a: 1}
   - Grid: 5
-    Color: {r: 0, g: 0.8758622, b: 1, a: 1}
+    Color: {r: 0, g: 0.830781, b: 0.9485294, a: 1}
   - Grid: 6
-    Color: {r: 0.9932049, g: 1, b: 0.50735295, a: 1}
+    Color: {r: 0.9961461, g: 1, b: 0.7205882, a: 1}
   - Grid: 7
-    Color: {r: 0.5872211, g: 1, b: 0.45588237, a: 1}
+    Color: {r: 0.5481148, g: 0.77205884, b: 0.47685987, a: 1}
   - Grid: 10
     Color: {r: 0.15787198, g: 0.53676474, b: 0.160485, a: 1}
   - Grid: 15
     Color: {r: 0.15121706, g: 0.30882353, b: 0, a: 1}
-  - Grid: 20
+  - Grid: 18
     Color: {r: 0.4044118, g: 0.24264708, b: 0, a: 1}
   - Grid: 20
-    Color: {r: 0.9949291, g: 0.63235295, b: 1, a: 1}
+    Color: {r: 0.6985294, g: 0.6985294, b: 0.6985294, a: 1}
 --- !u!114 &1256473748
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -376,3 +376,9 @@ MonoBehaviour:
   _varyAcceleration: {x: 0, y: 0}
   _accelerationScaleMin: 0.4
   _accelerationScaleMax: 0.8
+  _tempShift: 0
+  _tempShiftMin: 0.3
+  _tempShiftMax: 0.05
+  _goWarm: 0
+  _warmUpMax: 0.5
+  _coldDownMax: -0.5

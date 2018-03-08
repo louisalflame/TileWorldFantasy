@@ -57,9 +57,12 @@ public class RandomNoise : MonoBehaviour {
                 float sample = 0;
 
                 for (int i = 0; i < _points.Count; i++) {
-                    var point = _points[i];
+                    var point = new Vector2(
+                        _points[i].x * _spriteView.Width, 
+                        _points[i].y * _spriteView.Height);
+                    var coord = new Vector2( x, y );
 
-                    float distance = Vector2.Distance(point, new Vector2(xCoord, yCoord));
+                    float distance = Vector2.Distance(point, coord);
                     float upDegree = _radius - distance;
                     sample += _upScale * Mathf.Pow(_upSpeed, upDegree);
                 }
