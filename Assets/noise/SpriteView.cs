@@ -29,7 +29,7 @@ public class SpriteView : MonoBehaviour
     }
     [Header("Terrain Color")]
     [SerializeField]
-    private int _grid = 20;
+    private int _grid;
     [SerializeField]
     private List<TerrainColor> _terrains;
 

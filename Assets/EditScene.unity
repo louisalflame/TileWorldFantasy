@@ -367,8 +367,8 @@ MonoBehaviour:
   _spriteView: {fileID: 1256473747}
   _xOffset: 0
   _yOffset: 0
-  _scale: 5
-  _times: 5
+  _scale: 8
+  _times: 3
   _freqTimes: 2
   _varySpeed: {x: 0, y: 0}
   _speedScaleMin: 0
@@ -377,8 +377,25 @@ MonoBehaviour:
   _accelerationScaleMin: 0.4
   _accelerationScaleMax: 0.8
   _tempShift: 0
-  _tempShiftMin: 0.3
+  _tempShiftMin: 0.01
   _tempShiftMax: 0.05
   _goWarm: 0
-  _warmUpMax: 0.5
-  _coldDownMax: -0.5
+  _warmUpMax: 0.05
+  _coldDownMax: -0.05
+  _heightPercent: []
+  _grid: 10
+  _weathers:
+  - Grid: 0
+    Color: {r: 1, g: 1, b: 1, a: 1}
+  - Grid: 1
+    Color: {r: 0.05172414, g: 0, b: 0.44117647, a: 1}
+  - Grid: 3
+    Color: {r: 0.17933607, g: 0.40974006, b: 0.78676474, a: 1}
+  - Grid: 5
+    Color: {r: 0.69485295, g: 0.875, b: 0.6884191, a: 1}
+  - Grid: 7
+    Color: {r: 0.8602941, g: 0.28465617, b: 0.28465617, a: 1}
+  - Grid: 9
+    Color: {r: 0.44852942, g: 0.064959444, b: 0, a: 1}
+  - Grid: 10
+    Color: {r: 0.9862069, g: 1, b: 0, a: 1}
