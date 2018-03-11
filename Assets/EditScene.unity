@@ -335,7 +335,7 @@ MonoBehaviour:
   _pixWidth: 1000
   _pixHeight: 1000
   _heightPercent: []
-  _grid: 20
+  _terrainGrid: 20
   _terrains:
   - Grid: 0
     Color: {r: 0.08893815, g: 0.111006275, b: 0.25735295, a: 1}
@@ -353,6 +353,25 @@ MonoBehaviour:
     Color: {r: 0.4044118, g: 0.24264708, b: 0, a: 1}
   - Grid: 20
     Color: {r: 0.6985294, g: 0.6985294, b: 0.6985294, a: 1}
+  _temperaturePercent: []
+  _temperatureGrid: 10
+  _temperatures:
+  - Grid: 0
+    Color: {r: 0.011713977, g: 0, b: 0.1544118, a: 1}
+  - Grid: 1
+    Color: {r: 0.024847668, g: 0, b: 0.7205882, a: 1}
+  - Grid: 3
+    Color: {r: 0, g: 0.543205, b: 0.7647059, a: 1}
+  - Grid: 5
+    Color: {r: 0.63235295, g: 0.93914807, b: 1, a: 1}
+  - Grid: 5
+    Color: {r: 1, g: 0.993712, b: 0.77205884, a: 1}
+  - Grid: 7
+    Color: {r: 0.78676474, g: 0.439503, b: 0, a: 1}
+  - Grid: 9
+    Color: {r: 0.9705882, g: 0, b: 0, a: 1}
+  - Grid: 10
+    Color: {r: 0.375, g: 0, b: 0, a: 1}
 --- !u!114 &1256473748
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -367,12 +386,12 @@ MonoBehaviour:
   _spriteView: {fileID: 1256473747}
   _xOffset: 0
   _yOffset: 0
-  _scale: 8
+  _scale: 6
   _times: 3
   _freqTimes: 2
   _varySpeed: {x: 0, y: 0}
   _speedScaleMin: 0
-  _speedScaleMax: 0.01
+  _speedScaleMax: 0.001
   _varyAcceleration: {x: 0, y: 0}
   _accelerationScaleMin: 0.4
   _accelerationScaleMax: 0.8
@@ -382,20 +401,3 @@ MonoBehaviour:
   _goWarm: 0
   _warmUpMax: 0.05
   _coldDownMax: -0.05
-  _heightPercent: []
-  _grid: 10
-  _weathers:
-  - Grid: 0
-    Color: {r: 1, g: 1, b: 1, a: 1}
-  - Grid: 1
-    Color: {r: 0.05172414, g: 0, b: 0.44117647, a: 1}
-  - Grid: 3
-    Color: {r: 0.17933607, g: 0.40974006, b: 0.78676474, a: 1}
-  - Grid: 5
-    Color: {r: 0.69485295, g: 0.875, b: 0.6884191, a: 1}
-  - Grid: 7
-    Color: {r: 0.8602941, g: 0.28465617, b: 0.28465617, a: 1}
-  - Grid: 9
-    Color: {r: 0.44852942, g: 0.064959444, b: 0, a: 1}
-  - Grid: 10
-    Color: {r: 0.9862069, g: 1, b: 0, a: 1}

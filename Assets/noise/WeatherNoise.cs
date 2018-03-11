@@ -49,24 +49,6 @@ public class WeatherNoise : MonoBehaviour
     [SerializeField]
     private float _coldDownMax;
 
-    [Header("Height Percent")]
-    [SerializeField]
-    private float[] _heightPercent;
-    private int[] _nums;
-
-    [System.Serializable]
-    public class TerrainColor
-    {
-        [SerializeField]
-        public int Grid;
-        [SerializeField]
-        public Color Color;
-    }
-    [Header("temperature Color")]
-    [SerializeField]
-    private int _grid;
-    [SerializeField]
-    private List<TerrainColor> _weathers;
 
     private int _width;
     private int _height;
@@ -125,16 +107,14 @@ public class WeatherNoise : MonoBehaviour
 
     public void DrawTexture() {
         MakeWeatherMap(_spriteView.Width, _spriteView.Height);
-        _SetColors();
-        _spriteView.SetPixels(_colors);
+        _spriteView.SetTemperatureMap(_weatherMap);
     }
 
     public void PassNextTurn() {
         NextRandom();
         MakeWeatherMap(_spriteView.Width, _spriteView.Height);
         _tempratureChange();
-        _SetColors();
-        _spriteView.SetPixels(_colors);
+        _spriteView.SetTemperatureMap(_weatherMap);
     }
 
     private float _CountPerlinNoise(float xCoord, float yCoord) {
@@ -188,57 +168,6 @@ public class WeatherNoise : MonoBehaviour
         }
     }
 
-    private Color[] _SetColors()
-    {
-        _nums = new int[_grid];
-        _colors = new Color[_spriteView.Total];
-
-        for (int x = 0; x < _width; x++) {
-            for (int y = 0; y < _height; y++) {
-                  
-                var sample = _weatherMap[ y * _width +  x];
-                _CountGridNum(sample);
-                _colors[y * _width + x] = _CountSampleColor(sample);
-            }
-        }
-        _CountGridPercent();
-        return _colors;
-    }
-
-    private void _CountGridNum(float heightSample)
-    {
-        for (int i = 0; i < _grid; i++) {
-            if (heightSample < (float)(i + 1) / _grid) {
-                _nums[i]++;
-                break;
-            }
-        }
-    }
-    private void _CountGridPercent()
-    {
-        _heightPercent = new float[_grid];
-        for (int i = 0; i < _grid; i++)
-        {
-            _heightPercent[i] = (float)_nums[i] / _spriteView.Total;
-        }
-    }
-    private Color _CountSampleColor(float heightSample)
-    {
-        for (int i = 1; i < _weathers.Count; i++)
-        {
-            var weather1 = _weathers[i - 1];
-            var weather2 = _weathers[i];
-            if (heightSample < (float)weather2.Grid / (float)_grid)
-            {
-                var color1 = weather1.Color;
-                var color2 = weather2.Color;
-                float num1 = heightSample - (float)weather1.Grid / (float)_grid;
-                float num2 = (float)weather2.Grid / (float)_grid - (float)weather1.Grid / (float)_grid;
-                return Color.Lerp(color1, color2, Mathf.PingPong(num1 / num2, 1));
-            }
-        }
-        return _weathers[_weathers.Count - 1].Color;
-    }
 }
 
 

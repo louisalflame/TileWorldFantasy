@@ -17,7 +17,7 @@ public class SpriteView : MonoBehaviour
     [Header("Height Percent")]
     [SerializeField]
     private float[] _heightPercent;
-    private int[] _nums;
+    private int[] _heightNums;
 
     [System.Serializable]
     public class TerrainColor
@@ -29,9 +29,28 @@ public class SpriteView : MonoBehaviour
     }
     [Header("Terrain Color")]
     [SerializeField]
-    private int _grid;
+    private int _terrainGrid;
     [SerializeField]
     private List<TerrainColor> _terrains;
+
+    [Header("Temperature Percent")]
+    [SerializeField]
+    private float[] _temperaturePercent;
+    private int[] _temperatureNums;
+
+    [System.Serializable]
+    public class TemperatureColor
+    {
+        [SerializeField]
+        public int Grid;
+        [SerializeField]
+        public Color Color;
+    }
+    [Header("temperature Color")]
+    [SerializeField]
+    private int _temperatureGrid;
+    [SerializeField]
+    private List<TemperatureColor> _temperatures;
 
     public Texture2D NoiseTex {
         get { return _noiseTex; }
@@ -46,6 +65,12 @@ public class SpriteView : MonoBehaviour
         get { return _noiseTex.width * _noiseTex.height; }
     }
 
+    public void SetPixels(Color[] pixels) {
+        _noiseTex.SetPixels(pixels);
+        _noiseTex.Apply();
+    }
+
+#region Terrain
     private void Start()
     { 
         _noiseTex = new Texture2D(_pixWidth, _pixHeight);
@@ -55,62 +80,116 @@ public class SpriteView : MonoBehaviour
         _spriteRenderer.sprite = _sprite;
     }
 
-    public void SetHeightMap(float[] _heightMap)
+    public void SetHeightMap(float[] heightMap)
     {  
-        if (Total > _heightMap.Length) { return; }
+        if (Total > heightMap.Length) { return; }
 
-        _nums = new int[_grid];
+        _heightPercent = new float[_terrainGrid];
+        _heightNums = new int[_terrainGrid];
         _colors = new Color[Total];
 
         for (int x = 0; x < _noiseTex.width; x++) {
             for (int y = 0; y < _noiseTex.height; y++) {
 
                 int index = y * _noiseTex.width + x; 
-                float height = _heightMap[index];
+                float height = heightMap[index];
 
-                _CountGridNum(height);
-                _colors[index] = _CountSampleColor(height);
+                _CountTerrainGridNum(height);
+                _colors[index] = _CountTerrainColor(height);
             }
         }
-        _CountGridPercent();
+        _CountTerrainGridPercent();
 
         _noiseTex.SetPixels(_colors);
         _noiseTex.Apply();
     }
 
-    public void SetPixels(Color[] pixels) {
-        _noiseTex.SetPixels(pixels);
-        _noiseTex.Apply();
-    }
-
-    private void _CountGridNum(float heightSample) {
-        for (int i = 0; i < _grid; i++) {
-            if (heightSample < (float)(i+1) / _grid) {
-                _nums[i]++;
+    private void _CountTerrainGridNum(float heightSample) {
+        for (int i = 0; i < _terrainGrid; i++) {
+            if (heightSample < (float)(i+1) / _terrainGrid) {
+                _heightNums[i]++;
                 break;
             }
         }
     }
-    private void _CountGridPercent() {
-        _heightPercent = new float[_grid];
-        for (int i = 0; i < _grid; i++) {
-            _heightPercent[i] = (float)_nums[i] / Total;
+    private void _CountTerrainGridPercent() {
+        for (int i = 0; i < _terrainGrid; i++) {
+            _heightPercent[i] = (float)_heightNums[i] / Total;
         }
     }
 
-    private Color _CountSampleColor(float heightSample) { 
+    private Color _CountTerrainColor(float heightSample) { 
         for (int i = 1; i < _terrains.Count; i++) {
             var terrain1 = _terrains[i-1];
             var terrain2 = _terrains[i];
-            if (heightSample < (float)terrain2.Grid / (float)_grid)
+            if (heightSample < (float)terrain2.Grid / _terrainGrid)
             {
                 var color1 = terrain1.Color;
                 var color2 = terrain2.Color;
-                float num1 = heightSample - (float)terrain1.Grid / (float)_grid;
-                float num2 = (float)terrain2.Grid / (float)_grid - (float)terrain1.Grid / (float)_grid;
+                float num1 = heightSample - (float)terrain1.Grid / _terrainGrid;
+                float num2 = (float)terrain2.Grid / _terrainGrid - (float)terrain1.Grid / _terrainGrid;
                 return  Color.Lerp(color1, color2,  Mathf.PingPong(num1 / num2, 1));
             }
         }
         return _terrains[_terrains.Count - 1].Color;
     }
+    #endregion
+
+#region Temperature
+    public void SetTemperatureMap(float[] temperatureMap)
+    {
+        if (Total > temperatureMap.Length) { return; }
+
+        _temperaturePercent = new float[_temperatureGrid];
+        _temperatureNums = new int[_temperatureGrid];
+        _colors = new Color[Total];
+
+        for (int x = 0; x < Width; x++) {
+            for (int y = 0; y < Height; y++)  {
+
+                int index = y * _noiseTex.width + x;
+                var sample = temperatureMap[index];
+                _CountTemperatureGridNum(sample);
+                _colors[index] = _CountTemperatureSampleColor(sample);
+            }
+        }
+        _CountTemperatureGridPercent();
+
+        _noiseTex.SetPixels(_colors);
+        _noiseTex.Apply();
+    } 
+    private void _CountTemperatureGridNum(float heightSample)
+    {
+        for (int i = 0; i < _temperatureGrid; i++) {
+            if (heightSample < (float)(i + 1) / _temperatureGrid) {
+                _temperatureNums[i]++;
+                break;
+            }
+        }
+    }
+    private void _CountTemperatureGridPercent()
+    {
+        for (int i = 0; i < _temperatureGrid; i++) {
+            _temperaturePercent[i] = (float)_temperatureNums[i] / Total;
+        }
+    }
+    private Color _CountTemperatureSampleColor(float heightSample)
+    {
+        for (int i = 1; i < _temperatures.Count; i++)
+        {
+            var weather1 = _temperatures[i - 1];
+            var weather2 = _temperatures[i];
+            if (heightSample < (float)weather2.Grid / _temperatureGrid)
+            {
+                var color1 = weather1.Color;
+                var color2 = weather2.Color;
+                float num1 = heightSample - (float)weather1.Grid / _temperatureGrid;
+                float num2 = (float)weather2.Grid / _temperatureGrid - (float)weather1.Grid / _temperatureGrid;
+                return Color.Lerp(color1, color2, Mathf.PingPong(num1 / num2, 1));
+            }
+        }
+        return _temperatures[_temperatures.Count - 1].Color;
+    }
+#endregion
+
 }

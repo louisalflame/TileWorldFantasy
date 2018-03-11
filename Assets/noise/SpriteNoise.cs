@@ -58,7 +58,7 @@ public class SpriteNoise : MonoBehaviour {
         _upPoints = _randomNoise.GetRandomLoosePoints(_upNums);
     }
 
-    public float[] MakeHeightMap(int width, int height)
+    public IEnumerator MakeHeightMap(int width, int height)
     {
         _width = width;
         _height = height;
@@ -74,13 +74,14 @@ public class SpriteNoise : MonoBehaviour {
 
                 _heightMap[ y * _width + x] = sample;
             }
+            yield return null;
         }
-
-        return _heightMap;
+         
     }
 
-    public void DrawTexture() {
-        MakeHeightMap(_spriteView.Width, _spriteView.Height);
+    public IEnumerator DrawTexture() {
+        yield return MakeHeightMap(_spriteView.Width, _spriteView.Height);
+        Debug.Log(_heightMap.Length);
         _spriteView.SetHeightMap(_heightMap);
     }
 
@@ -103,8 +104,15 @@ public class SpriteNoise : MonoBehaviour {
                 yCoord * _spriteView.Height);
 
             float distance = Vector2.Distance(point, coord);
-            float upDegree = _radius - distance;
-            sample += _upScale * Mathf.Pow(_upSpeed, upDegree);
+
+            float upDegree = _radius - distance; 
+            float upHeight = _upScale * Mathf.Pow(_upSpeed, upDegree);
+            float upNoise = _CountRecursivePerlinNoise(
+                xCoord, yCoord,
+                _upPoints[i].x, _upPoints[i].y, 
+                _scale*2, 2, 2);
+
+            sample += upNoise * upHeight;
         }
 
         sample = Mathf.Pow(sample, _lowGround);
@@ -152,7 +160,7 @@ public class SpriteNoiseEditor : Editor
         SpriteNoise myScriptNoise = (SpriteNoise)target;
         if (GUILayout.Button("DrawTexture"))
         {
-            myScriptNoise.DrawTexture();
+            myScriptNoise.StartCoroutine(myScriptNoise.DrawTexture());
         }
 
         if (GUILayout.Button("NewRandom"))
