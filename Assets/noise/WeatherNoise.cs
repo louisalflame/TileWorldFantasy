@@ -48,8 +48,7 @@ public class WeatherNoise : MonoBehaviour
     private float _warmUpMax;
     [SerializeField]
     private float _coldDownMax;
-
-
+     
     private int _width;
     private int _height;
     private float[] _weatherMap;

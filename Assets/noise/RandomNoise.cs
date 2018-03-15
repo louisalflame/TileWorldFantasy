@@ -63,7 +63,8 @@ public class RandomNoise : MonoBehaviour {
                     var coord = new Vector2( x, y );
 
                     float distance = Vector2.Distance(point, coord);
-                    float upDegree = _radius - distance;
+                    float upDegree = (((_spriteView.Width + _spriteView.Height) / 2) * _radius - distance) 
+                        / ((_spriteView.Width + _spriteView.Height) / 2);
                     sample += _upScale * Mathf.Pow(_upSpeed, upDegree);
                 }
                 sample = Mathf.Min(1, sample);

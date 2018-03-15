@@ -46,16 +46,18 @@ public class SpriteNoise : MonoBehaviour {
     private float _upSpeed;
     [SerializeField]
     private List<Vector2> _upPoints = new List<Vector2>();
-
+     
     private int _width;
     private int _height;
     private float[] _heightMap;
+
+    private ITerrainGenerator _terrainGen = new TerrainGenerator();
          
     public void NewRandom()
     {
         _xOffset = Random.Range(-10000f, 10000f);
         _yOffset = Random.Range(-10000f, 10000f);
-        _upPoints = _randomNoise.GetRandomLoosePoints(_upNums);
+        _upPoints = _randomNoise.GetRandomLoosePoints(_upNums); 
     }
 
     public IEnumerator MakeHeightMap(int width, int height)
@@ -97,15 +99,16 @@ public class SpriteNoise : MonoBehaviour {
         for (int i = 0; i < _upPoints.Count; i++)
         {
             var point = new Vector2(
-                _upPoints[i].x * _spriteView.Width,
-                _upPoints[i].y * _spriteView.Height);
+                _upPoints[i].x * _width,
+                _upPoints[i].y * _height);
             var coord = new Vector2(
-                xCoord * _spriteView.Width,
-                yCoord * _spriteView.Height);
+                xCoord * _width,
+                yCoord * _height);
 
             float distance = Vector2.Distance(point, coord);
 
-            float upDegree = _radius - distance; 
+            float upDegree = (((_spriteView.Width + _spriteView.Height) / 2) * _radius - distance)
+                / ((_spriteView.Width + _spriteView.Height) / 2);
             float upHeight = _upScale * Mathf.Pow(_upSpeed, upDegree);
             float upNoise = _CountRecursivePerlinNoise(
                 xCoord, yCoord,
@@ -119,8 +122,8 @@ public class SpriteNoise : MonoBehaviour {
         sample = 1 - Mathf.Pow(1 - sample, _highMountain);
 
         float dis = Vector2.Distance(
-            new Vector2(5f, 5f),
-            new Vector2(10 * xCoord, 10 * yCoord));
+            new Vector2( 0.5f,  0.5f),
+            new Vector2( xCoord,  yCoord)) / 0.5f;
         sample = sample * (1 - _downOffset * Mathf.Pow(dis, _downSpeed));
 
         return sample;
