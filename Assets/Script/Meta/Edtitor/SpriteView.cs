@@ -71,7 +71,7 @@ public class SpriteView : MonoBehaviour
     }
 
 #region Terrain
-    private void Start()
+    void Start()
     { 
         _noiseTex = new Texture2D(_pixWidth, _pixHeight);
 
@@ -133,7 +133,7 @@ public class SpriteView : MonoBehaviour
         }
         return _terrains[_terrains.Count - 1].Color;
     }
-    #endregion
+#endregion
 
 #region Temperature
     public void SetTemperatureMap(float[] temperatureMap)
@@ -190,6 +190,29 @@ public class SpriteView : MonoBehaviour
         }
         return _temperatures[_temperatures.Count - 1].Color;
     }
-#endregion
+    #endregion
 
+    #region RandomPoint
+    public void SetLocalAreaMap(float[] localAreaMap)
+    {
+        if (Total > localAreaMap.Length) { return; }
+         
+        _colors = new Color[Total];
+
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+
+                int index = y * _noiseTex.width + x;
+                var sample = localAreaMap[index];
+
+                _colors[index] = new Color(sample, sample, sample);
+            }
+        } 
+
+        _noiseTex.SetPixels(_colors);
+        _noiseTex.Apply();
+    }
+    #endregion
 }

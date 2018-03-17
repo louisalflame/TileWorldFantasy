@@ -230,16 +230,16 @@ MonoBehaviour:
   _xOffset: 10
   _yOffset: 10
   _scale: 5
-  _lowGround: 4
-  _highMountain: 8
-  _times: 5
-  _freqTimes: 2
-  _downOffset: 0.6
-  _downSpeed: 2
-  _upNums: 10
-  _radius: 0.05
-  _upScale: 0.15
-  _upSpeed: 1e+9
+  _lowGroundFactor: 4
+  _highMountainFactor: 6
+  _freqCountTimes: 5
+  _freqGrowFactor: 2
+  _surroundDownOffset: 0.6
+  _surroundDownSpeed: 2
+  _loaclUpNums: 10
+  _localUpRadius: 0.05
+  _localUpScale: 0.15
+  _localUpSpeed: 1e+9
   _upPoints: []
 --- !u!212 &1256473744
 SpriteRenderer:
@@ -312,14 +312,19 @@ MonoBehaviour:
   _spriteView: {fileID: 1256473747}
   _points: []
   _nums: 5
-  _radius: 0.05
-  _upScale: 0.15
-  _upSpeed: 1e+9
-  _countTimes: 20
-  _minDistance: 0.2
-  _speed: 0.01
-  _wallDistance: 0.2
-  _wallSpeed: 0.05
+  _localAreaRadius: 0.05
+  _localAreaScale: 0.15
+  _localAreaSpeed: 1e+9
+  _countTime: 20
+  _pointsMinDistance: 0.2
+  _pointsSeperateSpeed: 0.01
+  _wallMinDistance: 0.2
+  _wallSeperateSpeed: 0.01
+  _localScale: 10
+  _localXOffset: 5
+  _localYOffset: 5
+  _localFreqCountTimes: 2
+  _localFreqGrowFactor: 2
 --- !u!114 &1256473747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -332,8 +337,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 1256473744}
-  _pixWidth: 100
-  _pixHeight: 100
+  _pixWidth: 300
+  _pixHeight: 300
   _heightPercent: []
   _terrainGrid: 20
   _terrains:
