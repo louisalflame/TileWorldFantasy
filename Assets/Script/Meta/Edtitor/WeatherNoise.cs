@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using Utility;
 
 public class WeatherNoise : MonoBehaviour
 { 
@@ -17,33 +18,25 @@ public class WeatherNoise : MonoBehaviour
     [SerializeField]
     private float _scale;
     [SerializeField]
-    private int _times;
+    private int _freqCountTimes;
     [SerializeField]
-    private int _freqTimes;
+    private int _freqGrowFactor;
 
-    [Header("direction Variety")]
-    [SerializeField]
-    private Vector2 _varySpeed;
+    [Header("direction Variety")] 
     [SerializeField]
     private float _speedScaleMin;
     [SerializeField]
-    private float _speedScaleMax;
-    [SerializeField]
-    private Vector2 _varyAcceleration;
+    private float _speedScaleMax; 
     [SerializeField]
     private float _accelerationScaleMin;
     [SerializeField]
     private float _accelerationScaleMax;
 
-    [Header("Offset Variety")]
+    [Header("Offset Variety")] 
     [SerializeField]
-    private float _tempShift;
+    private float _weatherShiftMin;
     [SerializeField]
-    private float _tempShiftMin;
-    [SerializeField]
-    private float _tempShiftMax;
-    [SerializeField]
-    private bool _goWarm;
+    private float _weatherShiftMax;
     [SerializeField]
     private float _warmUpMax;
     [SerializeField]
@@ -53,120 +46,93 @@ public class WeatherNoise : MonoBehaviour
     private int _height;
     private float[] _weatherMap;
 
-    private Color[] _colors;
+    public IWeatherGenerator _weatherGen = new WeatherGenerator(); 
 
-    public void NewRandom()
+    private Executor _executor = new Executor();
+    private Utility.Coroutine _weatherChange;
+
+    void Update()
     {
-        _xOffset = Random.Range(-10000f, 10000f);
-        _yOffset = Random.Range(-10000f, 10000f);
-        _varySpeed = new Vector2(Random.value * 2f - 1f, Random.value * 2f - 1f).normalized;
-        _varyAcceleration = new Vector2(Random.value * 2f - 1f, Random.value * 2f - 1f).normalized;
-
-        _tempShift = Random.Range(_tempShiftMin, _tempShiftMax);
-        _goWarm = Random.value > 0.5f;
-    }
-    public void NextRandom()
-    { 
-        var speed = _varySpeed * Random.Range(_speedScaleMin, _speedScaleMax);
-        _xOffset += speed.x;
-        _yOffset += speed.y;
-        var accerleration = _varyAcceleration * Random.Range(_accelerationScaleMin, _accelerationScaleMax);
-        _varySpeed = (_varySpeed + accerleration).normalized;
-        _varyAcceleration = new Vector2(Random.value*2f-1f, Random.value*2f-1f).normalized;
-         
-        if (_goWarm) {
-            _tempShift += Random.Range(_tempShiftMin, _tempShiftMax);
-            _goWarm = _tempShift < _warmUpMax;
-        }
-        else {
-            _tempShift -= Random.Range(_tempShiftMin, _tempShiftMax);
-            _goWarm = _tempShift < _coldDownMax;
-        }
+        _executor.Resume(Time.deltaTime);
     }
 
-    public float[] MakeWeatherMap(int width, int height)
+    public void DrawTexture()
     {
-        _width = width;
-        _height = height;
-        _weatherMap = new float[_width * _height];
+        _executor.Clear();
+        var MakeMapM = new Utility.Coroutine(_ShowWeatherMap());
+        _executor.Add(MakeMapM);
+    }
+     
+    public void StartWeatherChange()
+    {
+        _weatherChange = new Utility.Coroutine(_WeatherChangeUpdate());
+        _executor.Add(_weatherChange);
+    }
+    public void StopWeatherChange()
+    {
+        if (_weatherChange != null)
+            _executor.Remove(_weatherChange);
+    }
 
-        for (int x = 0; x < _width; x++) {
-            for (int y = 0; y < _height; y++) {
+    private IEnumerator _ShowWeatherMap()
+    {
+        Debug.Log("[WeatherGen] generate start");
+        yield return _weatherGen.GenerateWeatherMap(
+            _spriteView.Width, 
+            _spriteView.Height,
+            _xOffset,
+            _yOffset,
+            _GetWeatherGenPara()
+            );
 
-                float xCoord = (float)x / _width;
-                float yCoord = (float)y / _height;
-
-                float sample = _CountPerlinNoise( xCoord, yCoord );
-                _weatherMap[ y * _width +  x] = sample;
-            }
-        }
-
-        return _weatherMap;
-    } 
-
-    public void DrawTexture() {
-        MakeWeatherMap(_spriteView.Width, _spriteView.Height);
+        Debug.Log("[WeatherGen] generate complete");
+        _weatherMap = _weatherGen.WeatherMap;
         _spriteView.SetTemperatureMap(_weatherMap);
     }
 
-    public void PassNextTurn() {
-        NextRandom();
-        MakeWeatherMap(_spriteView.Width, _spriteView.Height);
-        _tempratureChange();
-        _spriteView.SetTemperatureMap(_weatherMap);
-    }
-
-    private float _CountPerlinNoise(float xCoord, float yCoord) {
-
-        float sample = 0f;
-        sample += _CountRecursivePerlinNoise(
-            xCoord, yCoord,
-            _xOffset, _yOffset, _scale,
-            _times, _freqTimes );
-
-        return sample;
-    }
-
-    private float _CountRecursivePerlinNoise(
-        float xCoord, float yCoord,
-        float xOffset, float yOffset, float scale,
-        int times, float freqTimes)
+    private IEnumerator _WeatherChangeUpdate()
     {
-        float sample = 0f;
-        float freqTime = 1f;
-        float sampleTimes = 0f;
-        for (int i = 0; i < times; i++)
+        while (true)
         {
-            sample += (1 / freqTime) *
-                Mathf.PerlinNoise(
-                    scale * (xCoord + xOffset) * freqTime ,
-                    scale * (yCoord + yOffset) * freqTime );
-            sampleTimes += (1 / freqTime);
-            freqTime *= freqTimes;
-        }
-        sample /= sampleTimes;
-
-        return sample;
-    }
-
-    private void _tempratureChange() {
-        
-        for (int x = 0; x < _width; x++) {
-            for (int y = 0; y < _height; y++) {
-                  
-                var sample = _weatherMap[ y * _width +  x];
-                
-                if (_tempShift > 0) {
-                    _weatherMap[y * _width + x] = _tempShift + sample * (1 - _tempShift); 
-                }
-                else {
-                    _weatherMap[y * _width + x] = sample * (1 + _tempShift);
-                }
-                
+            float sleepTime = 3;
+            while (sleepTime > 0)
+            {
+                yield return null;
+                sleepTime -= Time.deltaTime;
             }
+
+            Debug.Log("[WeatherGen] generate Next start");
+            yield return _weatherGen.ChangeToNextWeather();
+
+            _xOffset = _weatherGen.VarietyStatus.XOffset;
+            _yOffset = _weatherGen.VarietyStatus.YOffset;
+
+            _weatherMap = _weatherGen.WeatherMap;
+            _spriteView.SetTemperatureMap(_weatherMap);
         }
     }
 
+    private WeatherGeneratorParameter _GetWeatherGenPara()
+    {
+        return new WeatherGeneratorParameter()
+        {
+            SCALE = _scale,
+            FREQ_COUNT_TIMES = _freqCountTimes,
+            FREQ_GROW_FACTOR = _freqGrowFactor,
+
+            SPEED_SCALE_MIN = _speedScaleMin,
+            SPEED_SCALE_MAX = _speedScaleMax,
+
+            ACCELERATION_SCALE_MIN = _accelerationScaleMin,
+            ACCELERATION_SCALE_MAX = _accelerationScaleMax,
+
+            WEATHER_SHIFT_MIN = _weatherShiftMin,
+            WEATHER_SHIFT_MAX = _weatherShiftMax,
+
+            WARMUP_MAX = _warmUpMax,
+            COLDDOWN_MAX = _coldDownMax,
+        };
+    }
 }
 
 
@@ -182,13 +148,13 @@ public class WeatherNoiseEditor : Editor
         {
             myWeatherNoise.DrawTexture();
         }
-        if (GUILayout.Button("NextTurn"))
+        if (GUILayout.Button("StartWeatherChange"))
         {
-            myWeatherNoise.PassNextTurn();
+            myWeatherNoise.StartWeatherChange();
         }
-        if (GUILayout.Button("NewRandom"))
+        if (GUILayout.Button("StopWeatherChange"))
         {
-            myWeatherNoise.NewRandom();
+            myWeatherNoise.StopWeatherChange();
         }
     }
 }

@@ -392,17 +392,13 @@ MonoBehaviour:
   _xOffset: 0
   _yOffset: 0
   _scale: 6
-  _times: 3
-  _freqTimes: 2
-  _varySpeed: {x: 0, y: 0}
+  _freqCountTimes: 3
+  _freqGrowFactor: 2
   _speedScaleMin: 0
-  _speedScaleMax: 0.001
-  _varyAcceleration: {x: 0, y: 0}
+  _speedScaleMax: 0.01
   _accelerationScaleMin: 0.4
   _accelerationScaleMax: 0.8
-  _tempShift: 0
-  _tempShiftMin: 0.01
-  _tempShiftMax: 0.05
-  _goWarm: 0
+  _weatherShiftMin: 0.01
+  _weatherShiftMax: 0.05
   _warmUpMax: 0.05
   _coldDownMax: -0.05

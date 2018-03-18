@@ -9,7 +9,7 @@ public static class NoiseUtility
         float yOffset,
         float scale,
         int freqCountTimes,
-        float freqGrowFactor)
+        int freqGrowFactor)
     {
         float sample = 0f;
         float freq = 1f;
