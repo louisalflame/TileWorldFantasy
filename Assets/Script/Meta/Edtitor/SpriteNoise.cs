@@ -61,10 +61,10 @@ public class SpriteNoise : MonoBehaviour {
         _executor.Resume(Time.deltaTime);
     }
 
-    public void NewRandom()
+    public void SaveMap()
     {
-        _xOffset = Random.Range(-10000f, 10000f);
-        _yOffset = Random.Range(-10000f, 10000f);
+        var data = new SaveData();
+        data.SaveMap(_heightMap);
     }
 
     public void DrawTexture() {
@@ -117,9 +117,9 @@ public class SpriteNoiseEditor : Editor
             myScriptNoise.DrawTexture();
         }
 
-        if (GUILayout.Button("NewRandom"))
+        if (GUILayout.Button("SaveMap"))
         {
-            myScriptNoise.NewRandom();
+            myScriptNoise.SaveMap();
         }
     }
 }

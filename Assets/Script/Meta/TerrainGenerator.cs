@@ -16,7 +16,7 @@ public interface ITerrainGenerator
 
 public class TerrainGenerator : ITerrainGenerator
 {
-    private TerrainGeneratorParameter _para = new TerrainGeneratorConstParameter(); 
+    private TerrainGeneratorParameter _para; 
     
     private float _xOffset;
     private float _yOffset;
@@ -121,17 +121,4 @@ public class TerrainGeneratorParameter
     public float SURROUND_DOWN_SPEED = 2.0f;
 
     public RandomPointGeneratorParameter RANDOM_POINT_GEN_PARA = new RandomPointGeneratorParameter();
-}
-
-public class TerrainGeneratorConstParameter : TerrainGeneratorParameter
-{
-    public new readonly float SCALE = 5;
-    public new readonly float LOW_GROUND_FACTOR = 4;
-    public new readonly float HIGH_MOUNTAIN_FACTOR = 6;
-
-    public new readonly int FREQ_COUNT_TIMES = 5;
-    public new readonly int FREQ_GROW_FACTOR = 2;
-
-    public new readonly float SURROUND_DOWN_OFFSET = 0.6f;
-    public new readonly float SURROUND_DOWN_SPEED = 2.0f; 
 }

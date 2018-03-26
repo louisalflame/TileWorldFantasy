@@ -1,5 +1,4 @@
-﻿
-public interface ITileUnit
+﻿public interface ITileUnit
 {
 }
 
@@ -10,5 +9,5 @@ public class TileUnit
     private float _humidity;
 
     private int _population;
-      
+    
 }

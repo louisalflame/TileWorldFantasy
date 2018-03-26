@@ -46,7 +46,7 @@ public class WeatherNoise : MonoBehaviour
     private int _height;
     private float[] _weatherMap;
 
-    public IWeatherGenerator _weatherGen = new WeatherGenerator(); 
+    private IWeatherGenerator _weatherGen = new WeatherGenerator(); 
 
     private Executor _executor = new Executor();
     private Utility.Coroutine _weatherChange;
