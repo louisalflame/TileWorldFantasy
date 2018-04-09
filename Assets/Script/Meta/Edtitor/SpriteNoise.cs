@@ -47,9 +47,7 @@ public class SpriteNoise : MonoBehaviour {
     private float _localUpSpeed;
     [SerializeField]
     private List<Vector2> _upPoints = new List<Vector2>();
-     
-    private int _width;
-    private int _height;
+    
     private float[] _heightMap;
 
     private ITerrainGenerator _terrainGen = new TerrainGenerator();
@@ -63,8 +61,20 @@ public class SpriteNoise : MonoBehaviour {
 
     public void SaveMap()
     {
-        var data = new SaveData();
-        data.SaveMap(_heightMap);
+        var dataUnit = new SaveDataUnit {
+            Map = _heightMap,
+            Width = _spriteView.Width,
+            Height = _spriteView.Height,
+        };
+        SaveData.SaveMap(dataUnit);
+    }
+
+    public void LoadMap()
+    {
+        var data = SaveData.LoadMap();
+        _heightMap = data.Map;
+        _spriteView.ResetTexture(data.Width, data.Height);
+        _spriteView.SetHeightMap(_heightMap);
     }
 
     public void DrawTexture() {
@@ -120,6 +130,11 @@ public class SpriteNoiseEditor : Editor
         if (GUILayout.Button("SaveMap"))
         {
             myScriptNoise.SaveMap();
+        }
+
+        if (GUILayout.Button("LoadMap"))
+        {
+            myScriptNoise.LoadMap();
         }
     }
 }

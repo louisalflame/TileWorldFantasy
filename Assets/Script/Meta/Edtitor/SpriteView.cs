@@ -72,8 +72,13 @@ public class SpriteView : MonoBehaviour
 
 #region Terrain
     void Start()
-    { 
-        _noiseTex = new Texture2D(_pixWidth, _pixHeight);
+    {
+        ResetTexture(_pixWidth, _pixWidth);
+    }
+
+    public void ResetTexture(int width, int height)
+    {
+        _noiseTex = new Texture2D(width, height);
 
         var rect = new Rect(0, 0, _noiseTex.width, _noiseTex.height);
         _sprite = Sprite.Create(_noiseTex, rect, new Vector2(0.5f, 0.5f), 100);

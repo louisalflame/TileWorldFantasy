@@ -7,7 +7,6 @@ using UnityEngine;
 [ExecuteInEditMode] 
 public class SaveLoadEditWindow : EditorWindow
 {
-
     [MenuItem("Editor/SaveLoadEditor")]
     public static SaveLoadEditWindow OpenOrCreate()
     {
