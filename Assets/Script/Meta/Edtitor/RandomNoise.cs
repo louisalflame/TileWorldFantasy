@@ -67,6 +67,7 @@ public class RandomNoise : MonoBehaviour {
 
     private IEnumerator _ShowLocalAreaMap()
     {
+        float t1 = Time.time;
         Debug.Log("[RandomPointGen] generate start");
         yield return _randPointGen.GenerateRandomLocalAreaMap(
             _spriteView.Width,
@@ -78,6 +79,8 @@ public class RandomNoise : MonoBehaviour {
         _localAreaMap = _randPointGen.LocalAreaMap;
         _points = _randPointGen.Points;
         _spriteView.SetLocalAreaMap(_localAreaMap);
+        float t2 = Time.time;
+        Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }
 
     private RandomPointGeneratorParameter _GetRandPointGenPara()
@@ -101,7 +104,6 @@ public class RandomNoise : MonoBehaviour {
 
             LOCAL_AREA_RADIUS = _localAreaRadius,
             LOCAL_AREA_SCALE = _localAreaScale,
-            LOCAL_AREA_SPEED = _localAreaSpeed
         };
     }
      

@@ -238,7 +238,7 @@ MonoBehaviour:
   _surroundDownSpeed: 2
   _loaclUpNums: 10
   _localUpRadius: 0.05
-  _localUpScale: 0.15
+  _localUpScale: 3
   _localUpSpeed: 1e+9
   _upPoints: []
 --- !u!212 &1256473744
@@ -313,8 +313,8 @@ MonoBehaviour:
   _points: []
   _nums: 5
   _localAreaRadius: 0.05
-  _localAreaScale: 0.15
-  _localAreaSpeed: 1e+9
+  _localAreaScale: 3
+  _localAreaSpeed: 1
   _countTime: 20
   _pointsMinDistance: 0.2
   _pointsSeperateSpeed: 0.01
@@ -337,8 +337,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 1256473744}
-  _pixWidth: 300
-  _pixHeight: 300
+  _pixWidth: 200
+  _pixHeight: 200
   _heightPercent: []
   _terrainGrid: 20
   _terrains:

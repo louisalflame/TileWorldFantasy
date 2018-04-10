@@ -44,8 +44,6 @@ public class SpriteNoise : MonoBehaviour {
     [SerializeField]
     private float _localUpScale;
     [SerializeField]
-    private float _localUpSpeed;
-    [SerializeField]
     private List<Vector2> _upPoints = new List<Vector2>();
     
     private float[] _heightMap;
@@ -85,6 +83,7 @@ public class SpriteNoise : MonoBehaviour {
 
     private IEnumerator _ShowHeightMap()
     {
+        float t1 = Time.time;
         Debug.Log("[TerrainGen] generate start");
         yield return _terrainGen.GenerateHeightMap(
             _spriteView.Width, 
@@ -96,6 +95,8 @@ public class SpriteNoise : MonoBehaviour {
         Debug.Log("[TerrainGen] generate complete");
         _heightMap = _terrainGen.HeightMap;
         _spriteView.SetHeightMap(_heightMap);
+        float t2 = Time.time;
+        Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }
 
     private TerrainGeneratorParameter _GetTerrainGenPara()
@@ -109,6 +110,13 @@ public class SpriteNoise : MonoBehaviour {
             FREQ_GROW_FACTOR = _freqGrowFactor,
             SURROUND_DOWN_OFFSET = _surroundDownOffset,
             SURROUND_DOWN_SPEED = _surroundDownSpeed,
+
+            RANDOM_POINT_GEN_PARA = new RandomPointGeneratorParameter()
+            {
+                NUM = _loaclUpNums,
+                LOCAL_AREA_RADIUS = _localUpRadius,
+                LOCAL_AREA_SCALE = _localUpScale,
+            }
         };
     }
 }

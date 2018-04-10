@@ -33,7 +33,7 @@ public class TerrainGenerator : ITerrainGenerator
     }
 
     private int _sleepCount = 0;
-    private int _sleepMax = 50;
+    private int _sleepMax = 500;
 
     public IEnumerator GenerateHeightMap(
         int width, 
@@ -62,12 +62,14 @@ public class TerrainGenerator : ITerrainGenerator
         {
             for (int y = 0; y < _height; y++)
             {
+                int idx = x * _height + y;
+
                 float xCoord = (float)x / _width;
                 float yCoord = (float)y / _height;
 
-                var sample = _CountPerlinNoise(x, y, xCoord, yCoord);
+                var sample = _CountPerlinNoise(idx, xCoord, yCoord);
 
-                _heightMap[y * _width + x] = sample;
+                _heightMap[idx] = sample;
 
                 if (_sleepCount++ > _sleepMax)
                 {
@@ -78,7 +80,7 @@ public class TerrainGenerator : ITerrainGenerator
         }
     }
 
-    private float _CountPerlinNoise(int x, int y, float xCoord, float yCoord)
+    private float _CountPerlinNoise(int idx, float xCoord, float yCoord)
     {
         float sample = 0f;
 
@@ -91,7 +93,7 @@ public class TerrainGenerator : ITerrainGenerator
             _para.FREQ_COUNT_TIMES, 
             _para.FREQ_GROW_FACTOR);
 
-        sample += _localAreaMap[y * _width + x];
+        sample += _localAreaMap[idx];
 
         sample = Mathf.Pow(sample, _para.LOW_GROUND_FACTOR);
         sample = 1 - Mathf.Pow(1 - sample, _para.HIGH_MOUNTAIN_FACTOR);

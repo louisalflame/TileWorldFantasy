@@ -32,7 +32,7 @@ public class RandomPointGenerator : IRandomPointGenerator
     private List<Vector2> _moves;
 
     private int _sleepCount = 0;
-    private int _sleepMax = 50;
+    private int _sleepMax = 500;
 
     public IEnumerator GenerateRandomLocalAreaMap(
         int width,
@@ -65,9 +65,10 @@ public class RandomPointGenerator : IRandomPointGenerator
                 for (int i = 0; i < _points.Count; i++)
                 {
                     float distance = Vector2.Distance(_points[i], coord);
-                    float upDegree = _para.LOCAL_AREA_RADIUS - distance;
+                    float upDegree = _para.LOCAL_AREA_RADIUS > distance ?
+                        _para.LOCAL_AREA_RADIUS - distance : 0;
 
-                    float upHeight = _para.LOCAL_AREA_SCALE * Mathf.Pow(_para.LOCAL_AREA_SPEED, upDegree);
+                    float upHeight = _para.LOCAL_AREA_SCALE * upDegree;// * Mathf.Pow(_para.LOCAL_AREA_SPEED, upDegree);
 
                     float upNoise = NoiseUtility.CountRecursivePerlinNoise(
                         xCoord,
@@ -210,7 +211,6 @@ public class RandomPointGeneratorParameter
     public int LOCAL_FREQ_COUNT_TIMES = 2;
     public int LOCAL_FREQ_GROW_FACTOR = 2;
     
-    public float LOCAL_AREA_RADIUS = 0.05f;
-    public float LOCAL_AREA_SCALE = 0.15f;
-    public float LOCAL_AREA_SPEED = 1000000000f;
+    public float LOCAL_AREA_RADIUS = 0.1f;
+    public float LOCAL_AREA_SCALE = 3f;
 }
