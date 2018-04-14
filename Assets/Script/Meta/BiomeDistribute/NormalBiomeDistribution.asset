@@ -1,0 +1,771 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6c389b825e95d74fbd1405090743607, type: 3}
+  m_Name: NormalBiomeDistribution
+  m_EditorClassIdentifier: 
+  HumidityVariety: 4
+  HeightVariety: 5
+  TemperatureVariety: 5
+  BiomeHumuditys:
+  - BiomeHeights:
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: b1cb30c5411c90949a2d9a61089f6700, type: 2}
+      - {fileID: 11400000, guid: b275b08c444c0c745ae5df7e4a713dfe, type: 2}
+      - {fileID: 11400000, guid: 6c37bfa6973b1b846bb6c6bf453b6cc5, type: 2}
+      - {fileID: 11400000, guid: ec54a687d8f571e4e99e2c9e603164c2, type: 2}
+      - {fileID: 11400000, guid: 723346162ab8da043bd5ef50b26865d7, type: 2}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: b1cb30c5411c90949a2d9a61089f6700, type: 2}
+      - {fileID: 11400000, guid: b275b08c444c0c745ae5df7e4a713dfe, type: 2}
+      - {fileID: 11400000, guid: 6c37bfa6973b1b846bb6c6bf453b6cc5, type: 2}
+      - {fileID: 11400000, guid: ec54a687d8f571e4e99e2c9e603164c2, type: 2}
+      - {fileID: 11400000, guid: 723346162ab8da043bd5ef50b26865d7, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: b1cb30c5411c90949a2d9a61089f6700, type: 2}
+      - {fileID: 11400000, guid: b275b08c444c0c745ae5df7e4a713dfe, type: 2}
+      - {fileID: 11400000, guid: 6c37bfa6973b1b846bb6c6bf453b6cc5, type: 2}
+      - {fileID: 11400000, guid: ec54a687d8f571e4e99e2c9e603164c2, type: 2}
+      - {fileID: 11400000, guid: 723346162ab8da043bd5ef50b26865d7, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
+      - {fileID: 11400000, guid: a2a16ed55750e7d43905322440063fe5, type: 2}
+      - {fileID: 11400000, guid: a2a16ed55750e7d43905322440063fe5, type: 2}
+      - {fileID: 11400000, guid: a2a16ed55750e7d43905322440063fe5, type: 2}
+      - {fileID: 11400000, guid: a2a16ed55750e7d43905322440063fe5, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
+      - {fileID: 11400000, guid: a2a16ed55750e7d43905322440063fe5, type: 2}
+      - {fileID: 11400000, guid: a2a16ed55750e7d43905322440063fe5, type: 2}
+      - {fileID: 11400000, guid: a2a16ed55750e7d43905322440063fe5, type: 2}
+      - {fileID: 11400000, guid: a2a16ed55750e7d43905322440063fe5, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+  - BiomeHeights:
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 4c7adec1a2d56c7468d1a050b7c268de, type: 2}
+      - {fileID: 11400000, guid: d39e7633d76ddbd4a80e0f6488bb7376, type: 2}
+      - {fileID: 11400000, guid: febee71a66dfa3745ad5683b52281fa5, type: 2}
+      - {fileID: 11400000, guid: f7940dbd066b2834b898e2ea57841dc3, type: 2}
+      - {fileID: 11400000, guid: 665417277dec68744b3daba393d4b978, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 4c7adec1a2d56c7468d1a050b7c268de, type: 2}
+      - {fileID: 11400000, guid: d39e7633d76ddbd4a80e0f6488bb7376, type: 2}
+      - {fileID: 11400000, guid: febee71a66dfa3745ad5683b52281fa5, type: 2}
+      - {fileID: 11400000, guid: f7940dbd066b2834b898e2ea57841dc3, type: 2}
+      - {fileID: 11400000, guid: 665417277dec68744b3daba393d4b978, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 4c7adec1a2d56c7468d1a050b7c268de, type: 2}
+      - {fileID: 11400000, guid: d39e7633d76ddbd4a80e0f6488bb7376, type: 2}
+      - {fileID: 11400000, guid: febee71a66dfa3745ad5683b52281fa5, type: 2}
+      - {fileID: 11400000, guid: f7940dbd066b2834b898e2ea57841dc3, type: 2}
+      - {fileID: 11400000, guid: 665417277dec68744b3daba393d4b978, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
+      - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
+      - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
+      - {fileID: 11400000, guid: c3998f57fe1837c478a447f622b70e09, type: 2}
+      - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
+      - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
+      - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
+      - {fileID: 11400000, guid: c3998f57fe1837c478a447f622b70e09, type: 2}
+      - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+  - BiomeHeights:
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 4c7adec1a2d56c7468d1a050b7c268de, type: 2}
+      - {fileID: 11400000, guid: 69b5cd34af94e0c47aaa7499236a15b0, type: 2}
+      - {fileID: 11400000, guid: b4ba15961de7b02428d8fb16ceeed5f3, type: 2}
+      - {fileID: 11400000, guid: aad8d5fcc61af224996866c222ca259e, type: 2}
+      - {fileID: 11400000, guid: 998499535a89c08429283f23a655c62d, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 4c7adec1a2d56c7468d1a050b7c268de, type: 2}
+      - {fileID: 11400000, guid: 69b5cd34af94e0c47aaa7499236a15b0, type: 2}
+      - {fileID: 11400000, guid: b4ba15961de7b02428d8fb16ceeed5f3, type: 2}
+      - {fileID: 11400000, guid: aad8d5fcc61af224996866c222ca259e, type: 2}
+      - {fileID: 11400000, guid: 998499535a89c08429283f23a655c62d, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 4c7adec1a2d56c7468d1a050b7c268de, type: 2}
+      - {fileID: 11400000, guid: 69b5cd34af94e0c47aaa7499236a15b0, type: 2}
+      - {fileID: 11400000, guid: b4ba15961de7b02428d8fb16ceeed5f3, type: 2}
+      - {fileID: 11400000, guid: aad8d5fcc61af224996866c222ca259e, type: 2}
+      - {fileID: 11400000, guid: 998499535a89c08429283f23a655c62d, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
+      - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
+      - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
+      - {fileID: 11400000, guid: c3998f57fe1837c478a447f622b70e09, type: 2}
+      - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
+      - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
+      - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
+      - {fileID: 11400000, guid: c3998f57fe1837c478a447f622b70e09, type: 2}
+      - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+  - BiomeHeights:
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 3b0569a91a721564e9164d9e11b217c2, type: 2}
+      - {fileID: 11400000, guid: af9b931f33606e84fb925a525796a818, type: 2}
+      - {fileID: 11400000, guid: 614fef9bddd012844a4884520aabd1a5, type: 2}
+      - {fileID: 11400000, guid: d54af66beb237b84093cde866016e3d9, type: 2}
+      - {fileID: 11400000, guid: c0c5848dcc1b7a840a297d62afce041c, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 3b0569a91a721564e9164d9e11b217c2, type: 2}
+      - {fileID: 11400000, guid: af9b931f33606e84fb925a525796a818, type: 2}
+      - {fileID: 11400000, guid: 614fef9bddd012844a4884520aabd1a5, type: 2}
+      - {fileID: 11400000, guid: d54af66beb237b84093cde866016e3d9, type: 2}
+      - {fileID: 11400000, guid: c0c5848dcc1b7a840a297d62afce041c, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: 3b0569a91a721564e9164d9e11b217c2, type: 2}
+      - {fileID: 11400000, guid: af9b931f33606e84fb925a525796a818, type: 2}
+      - {fileID: 11400000, guid: 614fef9bddd012844a4884520aabd1a5, type: 2}
+      - {fileID: 11400000, guid: d54af66beb237b84093cde866016e3d9, type: 2}
+      - {fileID: 11400000, guid: c0c5848dcc1b7a840a297d62afce041c, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: cf97e733352b4624e871fcd3d6a76ce3, type: 2}
+      - {fileID: 11400000, guid: 6aa6aca148981f642bec15093720783d, type: 2}
+      - {fileID: 11400000, guid: 6aa6aca148981f642bec15093720783d, type: 2}
+      - {fileID: 11400000, guid: 141a4b01127c91d45acd4f1f02ea6ea7, type: 2}
+      - {fileID: 11400000, guid: 141a4b01127c91d45acd4f1f02ea6ea7, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 11400000, guid: cf97e733352b4624e871fcd3d6a76ce3, type: 2}
+      - {fileID: 11400000, guid: 6aa6aca148981f642bec15093720783d, type: 2}
+      - {fileID: 11400000, guid: 6aa6aca148981f642bec15093720783d, type: 2}
+      - {fileID: 11400000, guid: 141a4b01127c91d45acd4f1f02ea6ea7, type: 2}
+      - {fileID: 11400000, guid: 141a4b01127c91d45acd4f1f02ea6ea7, type: 2}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+    - BiomeTemperatures:
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
+      - {fileID: 0}
