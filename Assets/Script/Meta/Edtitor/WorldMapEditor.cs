@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using Utility;
 
 public class WorldMapEditor : EditorWindow
 {
@@ -26,7 +27,7 @@ public class WorldMapEditor : EditorWindow
     {
         try
         {
-            _onGUI();
+            _OnGUI();
         }
         catch (Exception e)
         {
@@ -39,14 +40,52 @@ public class WorldMapEditor : EditorWindow
     }
     #endregion
 
-    private Texture2D _worldTexture = null;
-
+    private SerializedObject _serializedObj;
     private bool _isEditorCompiling = false;
     private bool _isPlaying = false;
     private bool _initialGUI = false;
 
+    private enum MainMenuStatus {
+        None,
+        NewMap,
+        LoadMap,
+    }
+    private MainMenuStatus _mainMenuStatus = MainMenuStatus.None;
+
+    private Executor _executor = new Executor();
+
+    //Create 
+    private ITerrainGenerator _terrainGen = new TerrainGenerator();
+    [SerializeField]
+    private TerrainParameter _paramTerrain;
+    [SerializeField]
+    private RandomPointParameter _paramRandomPoint;
+    [SerializeField]
+    private WeatherParameter _paramWeather;
+    private SerializedProperty _propertyParamTerrain;
+    private SerializedProperty _propertyParamRandomPoint;
+    private SerializedProperty _propertyParamWeather;
+
+    private Texture2D _worldTexture = null;
+
     public void Init()
     {
+        _serializedObj = new SerializedObject(this);
+
+        _paramTerrain = AssetDatabase.LoadAssetAtPath<TerrainParameter>(
+            "Assets/Script/Meta/GeneratorParameter/BasicParamTerrain.asset");
+        _paramRandomPoint = AssetDatabase.LoadAssetAtPath<RandomPointParameter>(
+            "Assets/Script/Meta/GeneratorParameter/BasicParamRandomPoint.asset");
+        _paramWeather = AssetDatabase.LoadAssetAtPath<WeatherParameter>(
+            "Assets/Script/Meta/GeneratorParameter/BasicParamWeather.asset");
+        Debug.Log(_paramTerrain);
+        Debug.Log(_paramRandomPoint);
+        Debug.Log(_paramWeather);
+        _propertyParamTerrain = _serializedObj.FindProperty("_paramTerrain");
+        _propertyParamRandomPoint = _serializedObj.FindProperty("_paramRandomPoint");
+        _propertyParamWeather = _serializedObj.FindProperty("_paramWeather");
+        Debug.Log(_propertyParamTerrain);
+
         var mapData = SaveData.LoadMap();
         if (mapData != null)
         {
@@ -54,23 +93,9 @@ public class WorldMapEditor : EditorWindow
         }
     }
 
-    private void _loadWorldMapTexture(SaveDataUnit mapData)
-    {
-        _worldTexture = new Texture2D(mapData.Width, mapData.Height);
-        for (int i = 0; i < mapData.Width; i++)
-        {
-            for (int j = 0; j < mapData.Height; j++)
-            {
-                var height = mapData.Map[i * mapData.Width + j];
-                _worldTexture.SetPixel(i, j, new Color(height, height, height));
-            }
-        }
-        _worldTexture.Apply();
-    }
-
     #region DrawGUI
     private GUIStyle _mapStyle;
-    private void _onGUI()
+    private void _OnGUI()
     {
         if (EditorApplication.isCompiling)
         {
@@ -106,15 +131,34 @@ public class WorldMapEditor : EditorWindow
         // draw like that
         // +--------------------+
         // |       header       |
-        // +-----------+--------+
-        // |   main    |  side  |
-        // |  content  | search |
-        // +-----------+--------+
+        // +--------+-----------+
+        // |  side  |   main    |
+        // | search |  content  |
+        // +--------+-----------+
         // |       bottom       |
         // +--------------------+
         EditorGUILayout.BeginVertical();
-        _DrawHeader();
-        _DrawMain();
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                _DrawHeader();
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.BeginVertical();
+                {
+                    _DrawMenu();
+                }
+                EditorGUILayout.EndVertical();
+                EditorGUILayout.BeginVertical();
+                {
+                    _DrawMain();
+                }
+                EditorGUILayout.EndVertical();
+            }
+            EditorGUILayout.EndHorizontal();
+        }
         EditorGUILayout.EndVertical();
         Repaint();
 
@@ -131,21 +175,87 @@ public class WorldMapEditor : EditorWindow
 
     private void _DrawHeader()
     {
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("Reload"))
+        if (GUILayout.Button("New Map"))
         {
+            _mainMenuStatus = MainMenuStatus.NewMap;
         }
-        EditorGUILayout.EndHorizontal();
+        if (GUILayout.Button("Load Map"))
+        {
+            _mainMenuStatus = MainMenuStatus.LoadMap;
+        }
+    }
+
+    private void _DrawMenu()
+    {
+        switch (_mainMenuStatus)
+        {
+            case MainMenuStatus.NewMap:
+                _DrawMenuNewMap();
+                break;
+            case MainMenuStatus.LoadMap:
+                _DrawMenuLoadMap();
+                break;
+        }
     }
 
     private void _DrawMain()
     {
+        switch (_mainMenuStatus)
+        {
+            case MainMenuStatus.NewMap:
+                _DrawMainNewMap();
+                break;
+            case MainMenuStatus.LoadMap:
+                _DrawMainLoadMap();
+                break;
+        }
+    }
+
+    private void _DrawMenuNewMap()
+    {
+        if (GUILayout.Button("Create"))
+        {
+        }
+        if (GUILayout.Button("Save"))
+        {
+        }
+
+        EditorGUILayout.PropertyField(_propertyParamTerrain);
+        EditorGUILayout.PropertyField(_propertyParamRandomPoint);
+        EditorGUILayout.PropertyField(_propertyParamWeather);
+    }
+
+    private void _DrawMenuLoadMap()
+    {
+    }
+
+    private void _DrawMainNewMap()
+    {
+
+    }
+
+    private void _DrawMainLoadMap()
+    {
         if (_worldTexture != null)
         {
-            //EditorGUI.DrawPreviewTexture(new Rect(25, 60, 100, 100), _worldTexture);
-
             GUILayout.Box(_worldTexture, _mapStyle);
         }
     }
     #endregion
+
+
+
+    private void _loadWorldMapTexture(SaveDataUnit mapData)
+    {
+        _worldTexture = new Texture2D(mapData.Width, mapData.Height);
+        for (int i = 0; i < mapData.Width; i++)
+        {
+            for (int j = 0; j < mapData.Height; j++)
+            {
+                var height = mapData.Map[i * mapData.Width + j];
+                _worldTexture.SetPixel(i, j, new Color(height, height, height));
+            }
+        }
+        _worldTexture.Apply();
+    }
 }

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dc1e3d7f23e2ca4c9e485e0e9c561b6, type: 3}
+  m_Name: BasicParamWeather
+  m_EditorClassIdentifier: 
+  SCALE: 6
+  FREQ_COUNT_TIMES: 3
+  FREQ_GROW_FACTOR: 2
+  SPEED_SCALE_MIN: 0
+  SPEED_SCALE_MAX: 0.001
+  ACCELERATION_SCALE_MIN: 0.4
+  ACCELERATION_SCALE_MAX: 0.8
+  WEATHER_SHIFT_MIN: 0
+  WEATHER_SHIFT_MAX: 0.01
+  WARMUP_MAX: 0.05
+  COLDDOWN_MAX: -0.05
