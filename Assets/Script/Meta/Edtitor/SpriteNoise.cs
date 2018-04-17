@@ -85,16 +85,20 @@ public class SpriteNoise : MonoBehaviour {
     {
         float t1 = Time.time;
         Debug.Log("[TerrainGen] generate start");
-        yield return _terrainGen.GenerateHeightMap(
-            _spriteView.Width, 
-            _spriteView.Height,
-            _xOffset,
-            _yOffset,
-            _GetTerrainGenPara());
+        var monad = new BlockMonad<float[]>( r => 
+            _terrainGen.GenerateHeightMap(
+                _spriteView.Width,
+                _spriteView.Height,
+                _xOffset,
+                _yOffset,
+                _GetTerrainGenPara(),
+                r) );
+        yield return monad.Do();
 
         Debug.Log("[TerrainGen] generate complete");
-        _heightMap = _terrainGen.HeightMap;
+        _heightMap = monad.Result;
         _spriteView.SetHeightMap(_heightMap);
+
         float t2 = Time.time;
         Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }

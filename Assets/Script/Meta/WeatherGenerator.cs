@@ -1,19 +1,18 @@
-﻿
-
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
+using Utility;
 
 public interface IWeatherGenerator
 {
-    float[] WeatherMap { get; }
     WeatherVarietyStatus VarietyStatus { get; }
     IEnumerator GenerateWeatherMap(
            int width,
            int height,
            float xOffset,
            float yOffset,
-           WeatherGeneratorParameter para);
-    IEnumerator ChangeToNextWeather();
+           WeatherGeneratorParameter para,
+           IReturn<float[]> ret);
+    IEnumerator ChangeToNextWeather(IReturn<float[]> ret);
 }
 
 public class WeatherGenerator : IWeatherGenerator
@@ -43,7 +42,8 @@ public class WeatherGenerator : IWeatherGenerator
         int height,
         float xOffset,
         float yOffset,
-        WeatherGeneratorParameter para)
+        WeatherGeneratorParameter para,
+        IReturn<float[]> ret)
     { 
         _width = width;
         _height = height;
@@ -54,6 +54,8 @@ public class WeatherGenerator : IWeatherGenerator
         _weatherMap = new float[_width * _height];
 
         yield return _GenerateWeatherMap();
+
+        ret.Accept(_weatherMap);
     }
     
     private IEnumerator _GenerateWeatherMap()
@@ -80,12 +82,18 @@ public class WeatherGenerator : IWeatherGenerator
         }
     }
 
-    public IEnumerator ChangeToNextWeather()
+    public IEnumerator ChangeToNextWeather(IReturn<float[]> ret)
     {
-        if (_para == null) yield break;
+        if (_para == null || _weatherMap == null)
+        {
+            ret.Fail(new System.Exception("Need Initial / Need Parameter"));
+            yield break;
+        }
 
         NextRandom();
-        yield return _GenerateWeatherMap(); 
+        yield return _GenerateWeatherMap();
+
+        ret.Accept(_weatherMap);
     }
 
     private float _CountPerlinNoise(float xCoord, float yCoord)

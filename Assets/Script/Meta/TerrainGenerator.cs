@@ -2,16 +2,17 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utility;
 
 public interface ITerrainGenerator
 {
-    float[] HeightMap { get; } 
     IEnumerator GenerateHeightMap(
         int width, 
         int height,
         float xOffset,
         float yOffset,
-        TerrainGeneratorParameter para);
+        TerrainGeneratorParameter para,
+        IReturn<float[]> ret);
 } 
 
 public class TerrainGenerator : ITerrainGenerator
@@ -40,7 +41,8 @@ public class TerrainGenerator : ITerrainGenerator
         int height, 
         float xOffset,
         float yOffset,
-        TerrainGeneratorParameter para)
+        TerrainGeneratorParameter para,
+        IReturn<float[]> ret)
     {
         _width = width;
         _height = height;
@@ -49,11 +51,20 @@ public class TerrainGenerator : ITerrainGenerator
         _para = para;
 
         _heightMap = new float[_width * _height];
-        yield return _randPointGen.GenerateRandomLocalAreaMap(
-            width, height, _para.RANDOM_POINT_GEN_PARA);
-        _localAreaMap = _randPointGen.LocalAreaMap;
+
+        var genLocalMonad = new BlockMonad<float[]>( r => 
+            _randPointGen.GenerateRandomLocalAreaMap( width, height, _para.RANDOM_POINT_GEN_PARA, r));
+
+        yield return genLocalMonad.Do();
+        if (genLocalMonad.Error != null) {
+            ret.Fail(genLocalMonad.Error);
+            yield break;
+        }
+        _localAreaMap = genLocalMonad.Result;
 
         yield return _GenerateHeightMap();
+
+        ret.Accept(_heightMap);
     }
 
     private IEnumerator _GenerateHeightMap()

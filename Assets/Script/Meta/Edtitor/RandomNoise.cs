@@ -69,16 +69,20 @@ public class RandomNoise : MonoBehaviour {
     {
         float t1 = Time.time;
         Debug.Log("[RandomPointGen] generate start");
-        yield return _randPointGen.GenerateRandomLocalAreaMap(
-            _spriteView.Width,
-            _spriteView.Height,
-            _GetRandPointGenPara()
-        );
+
+        var monad = new BlockMonad<float[]>( r => 
+            _randPointGen.GenerateRandomLocalAreaMap(
+                _spriteView.Width,
+                _spriteView.Height,
+                _GetRandPointGenPara(),
+                r) );
+        yield return monad.Do();
 
         Debug.Log("[RandomPointGen] generate complete");
-        _localAreaMap = _randPointGen.LocalAreaMap;
+        _localAreaMap = monad.Result;
         _points = _randPointGen.Points;
         _spriteView.SetLocalAreaMap(_localAreaMap);
+
         float t2 = Time.time;
         Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }

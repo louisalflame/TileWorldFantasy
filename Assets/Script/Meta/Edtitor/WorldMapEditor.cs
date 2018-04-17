@@ -66,30 +66,20 @@ public class WorldMapEditor : EditorWindow
     private SerializedProperty _propertyParamRandomPoint;
     private SerializedProperty _propertyParamWeather;
 
+    private string _noticeTxt;
     private Texture2D _worldTexture = null;
 
     public void Init()
     {
         _serializedObj = new SerializedObject(this);
-
-        _paramTerrain = AssetDatabase.LoadAssetAtPath<TerrainParameter>(
-            "Assets/Script/Meta/GeneratorParameter/BasicParamTerrain.asset");
-        _paramRandomPoint = AssetDatabase.LoadAssetAtPath<RandomPointParameter>(
-            "Assets/Script/Meta/GeneratorParameter/BasicParamRandomPoint.asset");
-        _paramWeather = AssetDatabase.LoadAssetAtPath<WeatherParameter>(
-            "Assets/Script/Meta/GeneratorParameter/BasicParamWeather.asset");
-        Debug.Log(_paramTerrain);
-        Debug.Log(_paramRandomPoint);
-        Debug.Log(_paramWeather);
         _propertyParamTerrain = _serializedObj.FindProperty("_paramTerrain");
         _propertyParamRandomPoint = _serializedObj.FindProperty("_paramRandomPoint");
         _propertyParamWeather = _serializedObj.FindProperty("_paramWeather");
-        Debug.Log(_propertyParamTerrain);
 
         var mapData = SaveData.LoadMap();
         if (mapData != null)
         {
-            _loadWorldMapTexture(mapData);
+            _LoadWorldMapTexture(mapData);
         }
     }
 
@@ -215,6 +205,10 @@ public class WorldMapEditor : EditorWindow
     {
         if (GUILayout.Button("Create"))
         {
+            if (_CheckPreparedToCreate())
+            {
+                _CreateNewWorld();
+            }
         }
         if (GUILayout.Button("Save"))
         {
@@ -238,6 +232,7 @@ public class WorldMapEditor : EditorWindow
     {
         if (_worldTexture != null)
         {
+            EditorGUILayout.LabelField(_noticeTxt);
             GUILayout.Box(_worldTexture, _mapStyle);
         }
     }
@@ -245,7 +240,7 @@ public class WorldMapEditor : EditorWindow
 
 
 
-    private void _loadWorldMapTexture(SaveDataUnit mapData)
+    private void _LoadWorldMapTexture(SaveDataUnit mapData)
     {
         _worldTexture = new Texture2D(mapData.Width, mapData.Height);
         for (int i = 0; i < mapData.Width; i++)
@@ -257,5 +252,23 @@ public class WorldMapEditor : EditorWindow
             }
         }
         _worldTexture.Apply();
+    }
+
+    private bool _CheckPreparedToCreate()
+    {
+        if (_propertyParamTerrain == null ||
+            _propertyParamRandomPoint == null ||
+            _propertyParamWeather == null)
+        {
+            _noticeTxt = "Parameter is null !";
+            return false;
+        }
+        _noticeTxt = "";
+        return true;
+    }
+
+    private void _CreateNewWorld()
+    {
+        _executor.Clear();
     }
 }

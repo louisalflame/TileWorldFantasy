@@ -23,36 +23,46 @@ public class WorldMap : IWorldMap
     
     public IEnumerator Initialize()
     {
+        var genTerrainMonad = new BlockMonad<float[]>(r =>
+            _terrainGen.GenerateHeightMap(
+                MAP_WIDTH,
+                MAP_HEIGHT,
+                Random.Range(0, 10000),
+                Random.Range(0, 10000),
+                new TerrainGeneratorParameter(),
+                r));
+        var genTemperatureMonad = new BlockMonad<float[]>(r =>
+            _temperatureGen.GenerateWeatherMap(
+                MAP_WIDTH,
+                MAP_HEIGHT,
+                Random.Range(0, 10000),
+                Random.Range(0, 10000),
+                new WeatherGeneratorParameter(),
+                r));
+        var genHumidityMonad = new BlockMonad<float[]>(r =>
+            _humidityGen.GenerateWeatherMap(
+                MAP_WIDTH,
+                MAP_HEIGHT,
+                Random.Range(0, 10000),
+                Random.Range(0, 10000),
+                new WeatherGeneratorParameter(),
+                r));
+        var genManaMonad = new BlockMonad<float[]>(r =>
+            _manaGen.GenerateWeatherMap(
+                MAP_WIDTH,
+                MAP_HEIGHT,
+                Random.Range(0, 10000),
+                Random.Range(0, 10000),
+                new WeatherGeneratorParameter(),
+                r));
 
-        _terrainGen.GenerateHeightMap(
-            MAP_WIDTH,
-            MAP_HEIGHT,
-            Random.Range(0, 10000),
-            Random.Range(0, 10000),
-            new TerrainGeneratorParameter()
-            );
-        _temperatureGen.GenerateWeatherMap(
-            MAP_WIDTH,
-            MAP_HEIGHT,
-            Random.Range(0, 10000),
-            Random.Range(0, 10000),
-            new WeatherGeneratorParameter()
-            );
-        _humidityGen.GenerateWeatherMap(
-            MAP_WIDTH,
-            MAP_HEIGHT,
-            Random.Range(0, 10000),
-            Random.Range(0, 10000),
-            new WeatherGeneratorParameter()
-            );
-        _manaGen.GenerateWeatherMap(
-            MAP_WIDTH,
-            MAP_HEIGHT,
-            Random.Range(0, 10000),
-            Random.Range(0, 10000),
-            new WeatherGeneratorParameter()
-            );
+        var combineM = Monad.WhenAll(
+            genTerrainMonad, 
+            genTemperatureMonad,
+            genHumidityMonad,
+            genManaMonad);
 
+        _executor.Add(combineM.Do());
         yield return _executor.Join();
     }
 }

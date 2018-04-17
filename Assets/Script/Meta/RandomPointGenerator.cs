@@ -1,15 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Utility;
 
 public interface IRandomPointGenerator
 {
     List<Vector2> Points { get; }
-    float[] LocalAreaMap { get; }
     IEnumerator GenerateRandomLocalAreaMap(
            int width,
            int height,
-           RandomPointGeneratorParameter para);
+           RandomPointGeneratorParameter para,
+           IReturn<float[]> ret);
 }
 
 public class RandomPointGenerator : IRandomPointGenerator
@@ -37,7 +38,8 @@ public class RandomPointGenerator : IRandomPointGenerator
     public IEnumerator GenerateRandomLocalAreaMap(
         int width,
         int height,
-        RandomPointGeneratorParameter para)
+        RandomPointGeneratorParameter para,
+        IReturn<float[]> ret)
     {
         _width = width;
         _height = height;
@@ -48,6 +50,8 @@ public class RandomPointGenerator : IRandomPointGenerator
         yield return _GetRandomLoosePoints();
 
         yield return _GenerateRandomLocalAreaMap();
+
+        ret.Accept(_localAreaMap);
     }
 
     private IEnumerator _GenerateRandomLocalAreaMap()

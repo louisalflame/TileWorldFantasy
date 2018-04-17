@@ -77,16 +77,19 @@ public class WeatherNoise : MonoBehaviour
     private IEnumerator _ShowWeatherMap()
     {
         Debug.Log("[WeatherGen] generate start");
-        yield return _weatherGen.GenerateWeatherMap(
-            _spriteView.Width, 
-            _spriteView.Height,
-            _xOffset,
-            _yOffset,
-            _GetWeatherGenPara()
-            );
+
+        var monad = new BlockMonad<float[]>( r=> 
+            _weatherGen.GenerateWeatherMap(
+                _spriteView.Width,
+                _spriteView.Height,
+                _xOffset,
+                _yOffset,
+                _GetWeatherGenPara(),
+                r) );
+        yield return monad.Do();
 
         Debug.Log("[WeatherGen] generate complete");
-        _weatherMap = _weatherGen.WeatherMap;
+        _weatherMap = monad.Result;
         _spriteView.SetTemperatureMap(_weatherMap);
     }
 
@@ -102,12 +105,13 @@ public class WeatherNoise : MonoBehaviour
             }
 
             Debug.Log("[WeatherGen] generate Next start");
-            yield return _weatherGen.ChangeToNextWeather();
+            var monad = new BlockMonad<float[]>(r => _weatherGen.ChangeToNextWeather(r));
+            yield return monad.Do();
 
             _xOffset = _weatherGen.VarietyStatus.XOffset;
             _yOffset = _weatherGen.VarietyStatus.YOffset;
 
-            _weatherMap = _weatherGen.WeatherMap;
+            _weatherMap = monad.Result;
             _spriteView.SetTemperatureMap(_weatherMap);
         }
     }
