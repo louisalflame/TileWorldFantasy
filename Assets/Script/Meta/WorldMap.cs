@@ -29,7 +29,7 @@ public class WorldMap : IWorldMap
                 MAP_HEIGHT,
                 Random.Range(0, 10000),
                 Random.Range(0, 10000),
-                new TerrainGeneratorParameter(),
+                new TerrainParameter(),
                 r));
         var genTemperatureMonad = new BlockMonad<float[]>(r =>
             _temperatureGen.GenerateWeatherMap(
@@ -37,7 +37,7 @@ public class WorldMap : IWorldMap
                 MAP_HEIGHT,
                 Random.Range(0, 10000),
                 Random.Range(0, 10000),
-                new WeatherGeneratorParameter(),
+                new WeatherParameter(),
                 r));
         var genHumidityMonad = new BlockMonad<float[]>(r =>
             _humidityGen.GenerateWeatherMap(
@@ -45,7 +45,7 @@ public class WorldMap : IWorldMap
                 MAP_HEIGHT,
                 Random.Range(0, 10000),
                 Random.Range(0, 10000),
-                new WeatherGeneratorParameter(),
+                new WeatherParameter(),
                 r));
         var genManaMonad = new BlockMonad<float[]>(r =>
             _manaGen.GenerateWeatherMap(
@@ -53,7 +53,7 @@ public class WorldMap : IWorldMap
                 MAP_HEIGHT,
                 Random.Range(0, 10000),
                 Random.Range(0, 10000),
-                new WeatherGeneratorParameter(),
+                new WeatherParameter(),
                 r));
 
         var combineM = Monad.WhenAll(

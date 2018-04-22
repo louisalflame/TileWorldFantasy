@@ -57,24 +57,6 @@ public class SpriteNoise : MonoBehaviour {
         _executor.Resume(Time.deltaTime);
     }
 
-    public void SaveMap()
-    {
-        var dataUnit = new SaveDataUnit {
-            Map = _heightMap,
-            Width = _spriteView.Width,
-            Height = _spriteView.Height,
-        };
-        SaveData.SaveMap(dataUnit);
-    }
-
-    public void LoadMap()
-    {
-        var data = SaveData.LoadMap();
-        _heightMap = data.Map;
-        _spriteView.ResetTexture(data.Width, data.Height);
-        _spriteView.SetHeightMap(_heightMap);
-    }
-
     public void DrawTexture() {
         _executor.Clear();
         var MakeMapM = new Utility.Coroutine(_ShowHeightMap());
@@ -103,9 +85,9 @@ public class SpriteNoise : MonoBehaviour {
         Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }
 
-    private TerrainGeneratorParameter _GetTerrainGenPara()
+    private TerrainParameter _GetTerrainGenPara()
     {
-        return new TerrainGeneratorParameter()
+        return new TerrainParameter()
         {
             SCALE = _scale,
             LOW_GROUND_FACTOR = _lowGroundFactor,
@@ -115,7 +97,7 @@ public class SpriteNoise : MonoBehaviour {
             SURROUND_DOWN_OFFSET = _surroundDownOffset,
             SURROUND_DOWN_SPEED = _surroundDownSpeed,
 
-            RANDOM_POINT_GEN_PARA = new RandomPointGeneratorParameter()
+            RANDOM_POINT_GEN_PARA = new RandomPointParameter()
             {
                 NUM = _loaclUpNums,
                 LOCAL_AREA_RADIUS = _localUpRadius,
@@ -137,16 +119,6 @@ public class SpriteNoiseEditor : Editor
         if (GUILayout.Button("DrawTexture"))
         {
             myScriptNoise.DrawTexture();
-        }
-
-        if (GUILayout.Button("SaveMap"))
-        {
-            myScriptNoise.SaveMap();
-        }
-
-        if (GUILayout.Button("LoadMap"))
-        {
-            myScriptNoise.LoadMap();
         }
     }
 }

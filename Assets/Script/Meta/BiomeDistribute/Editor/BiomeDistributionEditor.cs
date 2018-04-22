@@ -13,7 +13,7 @@ public class BiomeDistributionEditor : Editor
     private SerializedProperty _humidityVariety;
     private SerializedProperty _temperatureVariety;
     private SerializedProperty _heightVariety;
-    private SerializedProperty _biomeHumuditys;
+    private SerializedProperty _biomeHumiditys;
 
     private Rect _lastRect;
 
@@ -22,7 +22,7 @@ public class BiomeDistributionEditor : Editor
         _humidityVariety = serializedObject.FindProperty("HumidityVariety");
         _temperatureVariety = serializedObject.FindProperty("TemperatureVariety");
         _heightVariety = serializedObject.FindProperty("HeightVariety");
-        _biomeHumuditys = serializedObject.FindProperty("BiomeHumuditys");
+        _biomeHumiditys = serializedObject.FindProperty("BiomeHumiditys");
     }
 
     public override void OnInspectorGUI()
@@ -61,8 +61,8 @@ public class BiomeDistributionEditor : Editor
     {
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.PropertyField(_humidityVariety);
-        EditorGUILayout.PropertyField(_temperatureVariety);
         EditorGUILayout.PropertyField(_heightVariety);
+        EditorGUILayout.PropertyField(_temperatureVariety);
         if (EditorGUI.EndChangeCheck())
         {
             _UpdateBiomeVariety(_humidityVariety.intValue, _temperatureVariety.intValue, _heightVariety.intValue);
@@ -71,12 +71,12 @@ public class BiomeDistributionEditor : Editor
 
     private void _UpdateBiomeVariety(int humiditys, int temperatures, int heights)
     {
-        _biomeHumuditys.ClearArray();
+        _biomeHumiditys.ClearArray();
 
         for (int i = 0; i < humiditys; i++)
         {
-            _biomeHumuditys.InsertArrayElementAtIndex(i);
-            SerializedProperty biomeheights = _GetBiomeheightsAt(_biomeHumuditys, i);
+            _biomeHumiditys.InsertArrayElementAtIndex(i);
+            SerializedProperty biomeheights = _GetBiomeheightsAt(_biomeHumiditys, i);
 
             for (int j = 0; j < temperatures; j++)
             {
@@ -101,7 +101,7 @@ public class BiomeDistributionEditor : Editor
         float startLineX = cellPosition.x;
         for (int i = 0; i < _humidityVariety.intValue; i++)
         {
-            SerializedProperty biomeheights = _GetBiomeheightsAt(_biomeHumuditys, i);
+            SerializedProperty biomeheights = _GetBiomeheightsAt(_biomeHumiditys, i);
             
             for (int j = 0; j < _temperatureVariety.intValue; j++)
             {

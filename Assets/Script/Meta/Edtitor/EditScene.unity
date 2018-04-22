@@ -336,8 +336,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 1256473744}
-  _pixWidth: 200
-  _pixHeight: 200
+  _pixWidth: 20
+  _pixHeight: 20
   _heightPercent: []
   _terrainGrid: 20
   _terrains:

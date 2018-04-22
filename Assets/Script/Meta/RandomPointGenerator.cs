@@ -9,13 +9,13 @@ public interface IRandomPointGenerator
     IEnumerator GenerateRandomLocalAreaMap(
            int width,
            int height,
-           RandomPointGeneratorParameter para,
+           RandomPointParameter para,
            IReturn<float[]> ret);
 }
 
 public class RandomPointGenerator : IRandomPointGenerator
 {
-    private RandomPointGeneratorParameter _para;
+    private RandomPointParameter _para;
 
     private int _width;
     private int _height;
@@ -38,7 +38,7 @@ public class RandomPointGenerator : IRandomPointGenerator
     public IEnumerator GenerateRandomLocalAreaMap(
         int width,
         int height,
-        RandomPointGeneratorParameter para,
+        RandomPointParameter para,
         IReturn<float[]> ret)
     {
         _width = width;

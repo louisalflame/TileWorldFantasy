@@ -116,9 +116,9 @@ public class WeatherNoise : MonoBehaviour
         }
     }
 
-    private WeatherGeneratorParameter _GetWeatherGenPara()
+    private WeatherParameter _GetWeatherGenPara()
     {
-        return new WeatherGeneratorParameter()
+        return new WeatherParameter()
         {
             SCALE = _scale,
             FREQ_COUNT_TIMES = _freqCountTimes,

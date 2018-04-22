@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using UnityEngine;
 
 public static class SaveData  {
-    private const string MAP_KEY = "MAP_KEY";
+    private const string SAVE_KEY = "SAVE_KEY";
 
     public static void SaveMap(SaveDataUnit saveDataUnit)
     {
@@ -21,8 +21,8 @@ public static class SaveData  {
 
     private static void _SaveMap(SaveDataUnit saveDataUnit)
     {
-        var mapJson = JsonUtility.ToJson(saveDataUnit);
-        PlayerPrefs.SetString(MAP_KEY, mapJson);
+        var saveJson = JsonUtility.ToJson(saveDataUnit);
+        PlayerPrefs.SetString(SAVE_KEY, saveJson);
     }
 
     public static SaveDataUnit LoadMap()
@@ -40,19 +40,17 @@ public static class SaveData  {
 
     private static SaveDataUnit _LoadMap()
     {
-        var dataString = PlayerPrefs.GetString(MAP_KEY);
+        var dataString = PlayerPrefs.GetString(SAVE_KEY);
         var dataUnit = JsonUtility.FromJson<SaveDataUnit>(dataString);
         return dataUnit;
     }
 }
 
-[DataContract]
+[Serializable]
 public class SaveDataUnit
 {
-    [DataMember]
-    public float[] Map;
-    [DataMember]
+    public TileUnit[] Map;
     public int Width;
-    [DataMember]
     public int Height;
 }
+ 

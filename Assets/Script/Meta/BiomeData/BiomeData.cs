@@ -1,11 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(menuName = "World/Biome", order = 1)]
 public class BiomeData : ScriptableObject {
-
     public Biome Biome;
     public Color Color;
-
 }

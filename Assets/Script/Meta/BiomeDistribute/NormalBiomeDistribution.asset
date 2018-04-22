@@ -14,7 +14,7 @@ MonoBehaviour:
   HumidityVariety: 4
   HeightVariety: 5
   TemperatureVariety: 5
-  BiomeHumuditys:
+  BiomeHumiditys:
   - BiomeHeights:
     - BiomeTemperatures:
       - {fileID: 11400000, guid: b1cb30c5411c90949a2d9a61089f6700, type: 2}
@@ -134,7 +134,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
       - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
       - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
-      - {fileID: 11400000, guid: c3998f57fe1837c478a447f622b70e09, type: 2}
+      - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
       - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
       - {fileID: 0}
       - {fileID: 0}
@@ -145,7 +145,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
       - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
       - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
-      - {fileID: 11400000, guid: c3998f57fe1837c478a447f622b70e09, type: 2}
+      - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
       - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
       - {fileID: 0}
       - {fileID: 0}
@@ -285,7 +285,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
       - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
       - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
-      - {fileID: 11400000, guid: c3998f57fe1837c478a447f622b70e09, type: 2}
+      - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
       - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
       - {fileID: 0}
       - {fileID: 0}
@@ -301,7 +301,7 @@ MonoBehaviour:
       - {fileID: 11400000, guid: 8d54ffd5f05d6c1479bd209b37267983, type: 2}
       - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
       - {fileID: 11400000, guid: cf2d2cad9c7e1b84fbc50014369d387a, type: 2}
-      - {fileID: 11400000, guid: c3998f57fe1837c478a447f622b70e09, type: 2}
+      - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
       - {fileID: 11400000, guid: 75a8d6bfbdb8e54438663f6ed972c332, type: 2}
       - {fileID: 0}
       - {fileID: 0}

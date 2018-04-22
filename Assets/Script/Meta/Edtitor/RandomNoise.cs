@@ -87,9 +87,9 @@ public class RandomNoise : MonoBehaviour {
         Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }
 
-    private RandomPointGeneratorParameter _GetRandPointGenPara()
+    private RandomPointParameter _GetRandPointGenPara()
     {
-        return new RandomPointGeneratorParameter()
+        return new RandomPointParameter()
         {
             NUM = _nums,
 

@@ -11,13 +11,13 @@ public interface ITerrainGenerator
         int height,
         float xOffset,
         float yOffset,
-        TerrainGeneratorParameter para,
+        TerrainParameter para,
         IReturn<float[]> ret);
 } 
 
 public class TerrainGenerator : ITerrainGenerator
 {
-    private TerrainGeneratorParameter _para; 
+    private TerrainParameter _para; 
     
     private float _xOffset;
     private float _yOffset;
@@ -41,7 +41,7 @@ public class TerrainGenerator : ITerrainGenerator
         int height, 
         float xOffset,
         float yOffset,
-        TerrainGeneratorParameter para,
+        TerrainParameter para,
         IReturn<float[]> ret)
     {
         _width = width;
@@ -53,7 +53,8 @@ public class TerrainGenerator : ITerrainGenerator
         _heightMap = new float[_width * _height];
 
         var genLocalMonad = new BlockMonad<float[]>( r => 
-            _randPointGen.GenerateRandomLocalAreaMap( width, height, _para.RANDOM_POINT_GEN_PARA, r));
+            _randPointGen.GenerateRandomLocalAreaMap( 
+                width, height, _para.RANDOM_POINT_GEN_PARA, r));
 
         yield return genLocalMonad.Do();
         if (genLocalMonad.Error != null) {
@@ -80,7 +81,7 @@ public class TerrainGenerator : ITerrainGenerator
 
                 var sample = _CountPerlinNoise(idx, xCoord, yCoord);
 
-                _heightMap[idx] = sample;
+                _heightMap[idx] = Mathf.Clamp(sample, 0f, 0.999f);
 
                 if (_sleepCount++ > _sleepMax)
                 {

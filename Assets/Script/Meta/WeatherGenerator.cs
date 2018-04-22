@@ -10,13 +10,15 @@ public interface IWeatherGenerator
            int height,
            float xOffset,
            float yOffset,
-           WeatherGeneratorParameter para,
+           WeatherParameter para,
            IReturn<float[]> ret);
     IEnumerator ChangeToNextWeather(IReturn<float[]> ret);
 }
 
 public class WeatherGenerator : IWeatherGenerator
-{ 
+{  
+    private WeatherParameter _para;
+
     private int _width;
     private int _height;
 
@@ -25,8 +27,6 @@ public class WeatherGenerator : IWeatherGenerator
     {
         get { return _varietyStatus; }
     }
-
-    private WeatherGeneratorParameter _para;
 
     private float[] _weatherMap;
     public float[] WeatherMap
@@ -42,7 +42,7 @@ public class WeatherGenerator : IWeatherGenerator
         int height,
         float xOffset,
         float yOffset,
-        WeatherGeneratorParameter para,
+        WeatherParameter para,
         IReturn<float[]> ret)
     { 
         _width = width;
