@@ -12,44 +12,17 @@ public class SpriteNoise : MonoBehaviour {
     [SerializeField]
     private RandomNoise _randomNoise;
 
+    [SerializeField]
+    private TerrainParameter _terrainParam;
+
     [Header("Basic Parameter")]
     [SerializeField]
     private float _xOffset;
     [SerializeField]
     private float _yOffset;
-    [SerializeField]
-    private float _scale;
-    [SerializeField]
-    private float _lowGroundFactor;
-    [SerializeField]
-    private float _highMountainFactor;
-     
-    [Header("Recursive Mode")]
-    [SerializeField]
-    private int _freqCountTimes;
-    [SerializeField]
-    private int _freqGrowFactor;
-
-    [Header("Island Mode")]
-    [SerializeField]
-    private float _surroundDownOffset;
-    [SerializeField]
-    private float _surroundDownSpeed;
-
-    [Header("Mountain Mode")] 
-    [SerializeField]
-    private int _loaclUpNums;
-    [SerializeField]
-    private float _localUpRadius;
-    [SerializeField]
-    private float _localUpScale;
-    [SerializeField]
-    private List<Vector2> _upPoints = new List<Vector2>();
     
     private float[] _heightMap;
-
     private ITerrainGenerator _terrainGen = new TerrainGenerator();
-
     private Executor _executor = new Executor();
 
     void Update()
@@ -73,7 +46,7 @@ public class SpriteNoise : MonoBehaviour {
                 _spriteView.Height,
                 _xOffset,
                 _yOffset,
-                _GetTerrainGenPara(),
+                _terrainParam,
                 r) );
         yield return monad.Do();
 
@@ -84,30 +57,10 @@ public class SpriteNoise : MonoBehaviour {
         float t2 = Time.time;
         Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }
-
-    private TerrainParameter _GetTerrainGenPara()
-    {
-        return new TerrainParameter()
-        {
-            SCALE = _scale,
-            LOW_GROUND_FACTOR = _lowGroundFactor,
-            HIGH_MOUNTAIN_FACTOR = _highMountainFactor,
-            FREQ_COUNT_TIMES = _freqCountTimes,
-            FREQ_GROW_FACTOR = _freqGrowFactor,
-            SURROUND_DOWN_OFFSET = _surroundDownOffset,
-            SURROUND_DOWN_SPEED = _surroundDownSpeed,
-
-            RANDOM_POINT_GEN_PARA = new RandomPointParameter()
-            {
-                NUM = _loaclUpNums,
-                LOCAL_AREA_RADIUS = _localUpRadius,
-                LOCAL_AREA_SCALE = _localUpScale,
-            }
-        };
-    }
+    
 }
 
-
+#if UNITY_EDITOR
 [CustomEditor(typeof(SpriteNoise))]
 public class SpriteNoiseEditor : Editor
 {
@@ -122,3 +75,4 @@ public class SpriteNoiseEditor : Editor
         }
     }
 }
+#endif

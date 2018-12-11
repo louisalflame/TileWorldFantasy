@@ -10,37 +10,14 @@ public class WeatherNoise : MonoBehaviour
     [SerializeField]
     private SpriteView _spriteView;
 
+    [SerializeField]
+    private WeatherParameter _weatherParam;
+
     [Header("Basic Parameter")]
     [SerializeField]
     private float _xOffset;
     [SerializeField]
     private float _yOffset; 
-    [SerializeField]
-    private float _scale;
-    [SerializeField]
-    private int _freqCountTimes;
-    [SerializeField]
-    private int _freqGrowFactor;
-
-    [Header("direction Variety")] 
-    [SerializeField]
-    private float _speedScaleMin;
-    [SerializeField]
-    private float _speedScaleMax; 
-    [SerializeField]
-    private float _accelerationScaleMin;
-    [SerializeField]
-    private float _accelerationScaleMax;
-
-    [Header("Offset Variety")] 
-    [SerializeField]
-    private float _weatherShiftMin;
-    [SerializeField]
-    private float _weatherShiftMax;
-    [SerializeField]
-    private float _warmUpMax;
-    [SerializeField]
-    private float _coldDownMax;
      
     private int _width;
     private int _height;
@@ -84,7 +61,7 @@ public class WeatherNoise : MonoBehaviour
                 _spriteView.Height,
                 _xOffset,
                 _yOffset,
-                _GetWeatherGenPara(),
+                _weatherParam,
                 r) );
         yield return monad.Do();
 
@@ -115,31 +92,9 @@ public class WeatherNoise : MonoBehaviour
             _spriteView.SetTemperatureMap(_weatherMap);
         }
     }
-
-    private WeatherParameter _GetWeatherGenPara()
-    {
-        return new WeatherParameter()
-        {
-            SCALE = _scale,
-            FREQ_COUNT_TIMES = _freqCountTimes,
-            FREQ_GROW_FACTOR = _freqGrowFactor,
-
-            SPEED_SCALE_MIN = _speedScaleMin,
-            SPEED_SCALE_MAX = _speedScaleMax,
-
-            ACCELERATION_SCALE_MIN = _accelerationScaleMin,
-            ACCELERATION_SCALE_MAX = _accelerationScaleMax,
-
-            WEATHER_SHIFT_MIN = _weatherShiftMin,
-            WEATHER_SHIFT_MAX = _weatherShiftMax,
-
-            WARMUP_MAX = _warmUpMax,
-            COLDDOWN_MAX = _coldDownMax,
-        };
-    }
 }
 
-
+#if UNITY_EDITOR
 [CustomEditor(typeof(WeatherNoise))]
 public class WeatherNoiseEditor : Editor
 {
@@ -162,3 +117,4 @@ public class WeatherNoiseEditor : Editor
         }
     }
 }
+#endif

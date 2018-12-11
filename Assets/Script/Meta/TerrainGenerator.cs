@@ -107,8 +107,8 @@ public class TerrainGenerator : ITerrainGenerator
 
         sample += _localAreaMap[idx];
 
-        sample = Mathf.Pow(sample, _para.LOW_GROUND_FACTOR);
-        sample = 1 - Mathf.Pow(1 - sample, _para.HIGH_MOUNTAIN_FACTOR);
+        sample = MathUtility.CountPow(sample, _para.LOW_GROUND_FACTOR);
+        sample = 1 - MathUtility.CountPow(1 - sample, _para.HIGH_MOUNTAIN_FACTOR);
 
         sample *= _CountSurroundDown(new Vector2(xCoord, yCoord));
 
@@ -118,21 +118,6 @@ public class TerrainGenerator : ITerrainGenerator
     private float _CountSurroundDown(Vector2 coord)
     {
         float dis = Vector2.Distance( new Vector2(0.5f, 0.5f), coord) / 0.5f;
-        return 1 - _para.SURROUND_DOWN_OFFSET * Mathf.Pow(dis, _para.SURROUND_DOWN_SPEED);
+        return 1 - _para.SURROUND_DOWN_OFFSET * MathUtility.CountPow(dis, _para.SURROUND_DOWN_SPEED);
     }
-}
-
-public class TerrainGeneratorParameter
-{
-    public float SCALE = 5;
-    public float LOW_GROUND_FACTOR = 4;
-    public float HIGH_MOUNTAIN_FACTOR = 6;
-
-    public int FREQ_COUNT_TIMES = 5;
-    public int FREQ_GROW_FACTOR = 2;
-
-    public float SURROUND_DOWN_OFFSET = 0.6f;
-    public float SURROUND_DOWN_SPEED = 2.0f;
-
-    public RandomPointGeneratorParameter RANDOM_POINT_GEN_PARA = new RandomPointGeneratorParameter();
 }

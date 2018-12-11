@@ -12,41 +12,10 @@ public class RandomNoise : MonoBehaviour {
     [SerializeField]
     private List<Vector2> _points;
 
-    [SerializeField]
-    private int _nums = 5;
 
-    [Header("Radius Parameter")]
     [SerializeField]
-    private float _localAreaRadius;
-    [SerializeField]
-    private float _localAreaScale;
-    [SerializeField]
-    private float _localAreaSpeed;
-
-    [Header("Loose Parameter")]
-    [SerializeField]
-    private int _countTime;
-    [SerializeField]
-    private float _pointsMinDistance;
-    [SerializeField]
-    private float _pointsSeperateSpeed;
-    [SerializeField]
-    private float _wallMinDistance;
-    [SerializeField]
-    private float _wallSeperateSpeed;
-     
-    [Header("Random Parameter")]
-    [SerializeField]
-    private float _localScale;
-    [SerializeField]
-    private float _localXOffset;
-    [SerializeField]
-    private float _localYOffset;
-    [SerializeField]
-    private int _localFreqCountTimes;
-    [SerializeField]
-    private int _localFreqGrowFactor;
-
+    private RandomPointParameter _randomParam;
+    
     private float[] _localAreaMap;
 
     private IRandomPointGenerator _randPointGen = new RandomPointGenerator();
@@ -74,7 +43,7 @@ public class RandomNoise : MonoBehaviour {
             _randPointGen.GenerateRandomLocalAreaMap(
                 _spriteView.Width,
                 _spriteView.Height,
-                _GetRandPointGenPara(),
+                _randomParam,
                 r) );
         yield return monad.Do();
 
@@ -86,33 +55,9 @@ public class RandomNoise : MonoBehaviour {
         float t2 = Time.time;
         Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }
-
-    private RandomPointParameter _GetRandPointGenPara()
-    {
-        return new RandomPointParameter()
-        {
-            NUM = _nums,
-
-            COUNT_TIME = _countTime,
-            POINTS_MIN_DISTANCE = _pointsMinDistance,
-            POINTS_SEPARATE_SPEED = _pointsSeperateSpeed,
-            WALL_MIN_DISTANCE = _wallMinDistance,
-            WALL_SEPARATE_SPEED = _wallSeperateSpeed,
-
-            LOCAL_SCALE = _localScale,
-            LOCAL_XOFFSET = _localXOffset,
-            LOCAL_YOFFSET = _localYOffset,
-
-            LOCAL_FREQ_COUNT_TIMES = _localFreqCountTimes,
-            LOCAL_FREQ_GROW_FACTOR = _localFreqGrowFactor,
-
-            LOCAL_AREA_RADIUS = _localAreaRadius,
-            LOCAL_AREA_SCALE = _localAreaScale,
-        };
-    }
-     
 }
- 
+
+#if UNITY_EDITOR
 [CustomEditor(typeof(RandomNoise))]
 public class RandomNoiseEditor : Editor
 {
@@ -127,3 +72,4 @@ public class RandomNoiseEditor : Editor
         }
     }
 }
+#endif

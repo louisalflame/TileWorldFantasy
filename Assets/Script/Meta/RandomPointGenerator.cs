@@ -72,7 +72,7 @@ public class RandomPointGenerator : IRandomPointGenerator
                     float upDegree = _para.LOCAL_AREA_RADIUS > distance ?
                         _para.LOCAL_AREA_RADIUS - distance : 0;
 
-                    float upHeight = _para.LOCAL_AREA_SCALE * upDegree;// * Mathf.Pow(_para.LOCAL_AREA_SPEED, upDegree);
+                    float upHeight = _para.LOCAL_AREA_SCALE * upDegree; 
 
                     float upNoise = NoiseUtility.CountRecursivePerlinNoise(
                         xCoord,
@@ -140,6 +140,7 @@ public class RandomPointGenerator : IRandomPointGenerator
             _moves.Add(Vector2.zero);
         }
     }
+
     private void _checkOtherPointDistance(int i, int j)
     {
         var selfPoint = _points[i];
@@ -196,25 +197,4 @@ public class RandomPointGenerator : IRandomPointGenerator
         }
         return true;
     }
-}
-
-public class RandomPointGeneratorParameter
-{
-    public int NUM = 10;
-
-    public int COUNT_TIME = 20;
-    public float POINTS_MIN_DISTANCE = 0.2f;
-    public float POINTS_SEPARATE_SPEED = 0.01f;
-    public float WALL_MIN_DISTANCE = 0.2f;
-    public float WALL_SEPARATE_SPEED = 0.01f;
-
-    public float LOCAL_SCALE = 10;
-    public float LOCAL_XOFFSET = 5;
-    public float LOCAL_YOFFSET = 5;
-
-    public int LOCAL_FREQ_COUNT_TIMES = 2;
-    public int LOCAL_FREQ_GROW_FACTOR = 2;
-    
-    public float LOCAL_AREA_RADIUS = 0.1f;
-    public float LOCAL_AREA_SCALE = 3f;
 }

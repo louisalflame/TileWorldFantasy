@@ -148,27 +148,6 @@ public class WeatherGenerator : IWeatherGenerator
     }
 }
 
-public class WeatherGeneratorParameter
-{
-    public float SCALE = 6;
-    public int FREQ_COUNT_TIMES = 3;
-    public int FREQ_GROW_FACTOR = 2;
-
-    // Should Move Very SLOW
-    public float SPEED_SCALE_MIN = 0;
-    public float SPEED_SCALE_MAX = 0.001f;
-
-    public float ACCELERATION_SCALE_MIN = 0.4f;
-    public float ACCELERATION_SCALE_MAX = 0.8f;
-
-    // Should Shift Very SLOW
-    public float WEATHER_SHIFT_MIN = 0;
-    public float WEATHER_SHIFT_MAX = 0.01f;
-
-    public float WARMUP_MAX = 0.05f;
-    public float COLDDOWN_MAX = -0.05f;
-}
-
 public class WeatherVarietyStatus
 {
     public float XOffset;

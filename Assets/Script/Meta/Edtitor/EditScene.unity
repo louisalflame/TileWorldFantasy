@@ -227,19 +227,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spriteView: {fileID: 1256473747}
   _randomNoise: {fileID: 1256473746}
+  _terrainParam: {fileID: 11400000, guid: a5760ece64f505e4ab7d53aa5d323cdb, type: 2}
   _xOffset: 10
   _yOffset: 10
-  _scale: 5
-  _lowGroundFactor: 4
-  _highMountainFactor: 6
-  _freqCountTimes: 5
-  _freqGrowFactor: 2
-  _surroundDownOffset: 0.6
-  _surroundDownSpeed: 2
-  _loaclUpNums: 10
-  _localUpRadius: 0.1
-  _localUpScale: 3
-  _upPoints: []
 --- !u!212 &1256473744
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -310,20 +300,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spriteView: {fileID: 1256473747}
   _points: []
-  _nums: 5
-  _localAreaRadius: 0.1
-  _localAreaScale: 3
-  _localAreaSpeed: 1
-  _countTime: 20
-  _pointsMinDistance: 0.2
-  _pointsSeperateSpeed: 0.01
-  _wallMinDistance: 0.2
-  _wallSeperateSpeed: 0.01
-  _localScale: 10
-  _localXOffset: 5
-  _localYOffset: 5
-  _localFreqCountTimes: 2
-  _localFreqGrowFactor: 2
+  _randomParam: {fileID: 11400000, guid: 27c443291baf97844bf29d4bf4978f8c, type: 2}
 --- !u!114 &1256473747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,9 +313,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 1256473744}
-  _pixWidth: 20
-  _pixHeight: 20
-  _heightPercent: []
+  _pixWidth: 1000
+  _pixHeight: 1000
+  _heightPercent:
+  - 1
+  - 2
   _terrainGrid: 20
   _terrains:
   - Grid: 0
@@ -357,7 +336,9 @@ MonoBehaviour:
     Color: {r: 0.4044118, g: 0.24264708, b: 0, a: 1}
   - Grid: 20
     Color: {r: 0.6985294, g: 0.6985294, b: 0.6985294, a: 1}
-  _temperaturePercent: []
+  _temperaturePercent:
+  - 1
+  - 2
   _temperatureGrid: 10
   _temperatures:
   - Grid: 0
@@ -388,16 +369,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteView: {fileID: 1256473747}
+  _weatherParam: {fileID: 11400000, guid: 4409a63bd61cf36439ca6534a2ab13d5, type: 2}
   _xOffset: 0
   _yOffset: 0
-  _scale: 6
-  _freqCountTimes: 3
-  _freqGrowFactor: 2
-  _speedScaleMin: 0
-  _speedScaleMax: 0.01
-  _accelerationScaleMin: 0.4
-  _accelerationScaleMax: 0.8
-  _weatherShiftMin: 0.01
-  _weatherShiftMax: 0.05
-  _warmUpMax: 0.05
-  _coldDownMax: -0.05

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public static class NoiseUtility
-{ 
+{
     public static float CountRecursivePerlinNoise(
         float xCoord,
         float yCoord,
@@ -28,5 +28,33 @@ public static class NoiseUtility
         sample /= sampleTimes;
 
         return sample;
+    }
+}
+
+public static class MathUtility
+{
+    public static float CountPow(float number, float pow)
+    {
+        var ans = 1f;
+        while (pow >= 1)
+        {
+            ans *= number;
+            pow -= 1;
+        }
+
+        var floatPow = 0.5f;
+        var root = Mathf.Sqrt(number);
+        while (pow >= 0.05f)
+        {
+            if (pow >= floatPow)
+            {
+                ans *= root;
+                pow -= floatPow;
+            }
+            floatPow /= 2;
+            root = Mathf.Sqrt(root);
+        }
+
+        return ans;
     }
 }
