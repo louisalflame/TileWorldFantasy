@@ -61,13 +61,6 @@ public class WorldMapEditor : EditorWindow
     private MainMenuStatus _mainMenuStatus = MainMenuStatus.None;
     private NewMapStatus _newMapStatus = NewMapStatus.None;
 
-    private Executor _executor = new Executor();
-
-    //Create 
-    private ITerrainGenerator _terrainGen = new TerrainGenerator();
-    private IWeatherGenerator _temperatureGen = new WeatherGenerator();
-    private IWeatherGenerator _humidityGen = new WeatherGenerator();
-    private IWeatherGenerator _manaGen = new WeatherGenerator();
     [SerializeField]
     private TerrainParameter _paramTerrain;
     [SerializeField]
@@ -78,6 +71,7 @@ public class WorldMapEditor : EditorWindow
     private int _width = 0;
     [SerializeField]
     private int _height = 0;
+
     private SerializedProperty _propertyParamTerrain;
     private SerializedProperty _propertyParamWeather;
     private SerializedProperty _propertyBiomeDistribution;
@@ -86,6 +80,14 @@ public class WorldMapEditor : EditorWindow
 
     private string _noticeTxt;
     private Texture2D _worldTexture = null;
+    private TileUnit[] _TileUnitMap = null;
+    private Executor _executor = new Executor();
+
+    //Create 
+    private ITerrainGenerator _terrainGen = new TerrainGenerator();
+    private IWeatherGenerator _temperatureGen = new WeatherGenerator();
+    private IWeatherGenerator _humidityGen = new WeatherGenerator();
+    private IWeatherGenerator _manaGen = new WeatherGenerator();
 
     public void Init()
     {
@@ -238,6 +240,14 @@ public class WorldMapEditor : EditorWindow
         }
         if (GUILayout.Button("Save"))
         {
+            var dataUnit = new TileDataUnit
+            {
+                Map = _TileUnitMap,
+                Width = _width,
+                Height = _height,
+            };
+            SaveData.SaveMap(dataUnit);
+            Debug.Log("save");
         }
 
     }
@@ -285,7 +295,10 @@ public class WorldMapEditor : EditorWindow
                 _serializedObj.ApplyModifiedProperties();
             }
         }
-        catch(System.Exception e) { }
+        catch(System.Exception e)
+        {
+            Debug.LogError(e);
+        }
     }
 
     private bool _CheckPreparedToCreate()
@@ -345,7 +358,7 @@ public class WorldMapEditor : EditorWindow
         var terrainMap = genTerrainMonad.Result;
         var humidityMap = genHumidityMonad.Result;
         var temperatureMap = genTemperatureMonad.Result;
-        var tileUnitMap = new TileUnit[_width * _height];
+        _TileUnitMap = new TileUnit[_width * _height];
 
         IBiomeIdentifier identifier = new BasicBiomeIdentifier(_biomeDistribution);
         for (int x = 0; x < _width; x++)
@@ -359,26 +372,17 @@ public class WorldMapEditor : EditorWindow
                 var temperature = temperatureMap[idx];
                 
                 BiomeData biome = identifier.IdentifyBiome(humidity, height, temperature);
-                tileUnitMap[idx] = new TileUnit(
+                _TileUnitMap[idx] = new TileUnit(
                     height,
                     humidity,
                     temperature,
                     biome.Biome);
             }
         }
-        
-        var dataUnit = new SaveDataUnit
-        {
-            Map = tileUnitMap,
-            Width = _width,
-            Height = _height,
-        };
-        SaveData.SaveMap(dataUnit);
-        Debug.Log("save");
     }
     #endregion
 
-    private void _LoadWorldMapTexture(SaveDataUnit mapData)
+    private void _LoadWorldMapTexture(TileDataUnit mapData)
     {
         _noticeTxt = string.Format("Load Map  - {0}*{1}", mapData.Width, mapData.Height);
         _worldTexture = new Texture2D(mapData.Width, mapData.Height);
