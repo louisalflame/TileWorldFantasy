@@ -51,15 +51,23 @@ public class WorldMapEditor : EditorWindow
     private enum MainMenuStatus {
         None,
         NewMap,
-        LoadMap,
+        ViewMap,
     }
     private enum NewMapStatus {
         None,
         Parameter,
         Create,
+        Save,
+        Load,
+    }
+    private enum ViewMapStatus
+    {
+        None,
+        Picture
     }
     private MainMenuStatus _mainMenuStatus = MainMenuStatus.None;
     private NewMapStatus _newMapStatus = NewMapStatus.None;
+    private ViewMapStatus _loadMapStatus = ViewMapStatus.None;
 
     [SerializeField]
     private TerrainParameter _paramTerrain;
@@ -67,6 +75,10 @@ public class WorldMapEditor : EditorWindow
     private WeatherParameter _paramWeather;
     [SerializeField]
     private BiomeDistribution _biomeDistribution;
+    [SerializeField]
+    private ColorRangeDistribution _terrainColor;
+    [SerializeField]
+    private ColorRangeDistribution _weatherColor;
     [SerializeField]
     private int _width = 0;
     [SerializeField]
@@ -77,6 +89,8 @@ public class WorldMapEditor : EditorWindow
     private SerializedProperty _propertyBiomeDistribution;
     private SerializedProperty _propertyWidth;
     private SerializedProperty _propertyHeight;
+    private SerializedProperty _propertyTerrainColorRange;
+    private SerializedProperty _propertyWeatherColorRange;
 
     private string _noticeTxt;
     private Texture2D _worldTexture = null;
@@ -97,6 +111,8 @@ public class WorldMapEditor : EditorWindow
         _propertyBiomeDistribution = _serializedObj.FindProperty("_biomeDistribution");
         _propertyWidth = _serializedObj.FindProperty("_width");
         _propertyHeight = _serializedObj.FindProperty("_height");
+        _propertyTerrainColorRange = _serializedObj.FindProperty("_terrainColor");
+        _propertyWeatherColorRange = _serializedObj.FindProperty("_weatherColor");
     }
     #endregion
 
@@ -186,15 +202,9 @@ public class WorldMapEditor : EditorWindow
         {
             _mainMenuStatus = MainMenuStatus.NewMap;
         }
-        if (GUILayout.Button("Load Map"))
+        if (GUILayout.Button("View Map"))
         {
-            _mainMenuStatus = MainMenuStatus.LoadMap; 
-
-            var mapData = SaveData.LoadMap();
-            if (mapData != null)
-            {
-                _LoadWorldMapTexture(mapData);
-            }
+            _mainMenuStatus = MainMenuStatus.ViewMap; 
         }
     }
 
@@ -205,8 +215,8 @@ public class WorldMapEditor : EditorWindow
             case MainMenuStatus.NewMap:
                 _DrawMenuNewMap();
                 break;
-            case MainMenuStatus.LoadMap:
-                _DrawMenuLoadMap();
+            case MainMenuStatus.ViewMap:
+                _DrawMenuViewMap();
                 break;
         }
     }
@@ -218,8 +228,8 @@ public class WorldMapEditor : EditorWindow
             case MainMenuStatus.NewMap:
                 _DrawMainNewMap();
                 break;
-            case MainMenuStatus.LoadMap:
-                _DrawMainLoadMap();
+            case MainMenuStatus.ViewMap:
+                _DrawMainViewMap();
                 break;
         }
     }
@@ -232,14 +242,15 @@ public class WorldMapEditor : EditorWindow
         }
         if (GUILayout.Button("Create"))
         {
+            _newMapStatus = NewMapStatus.Create;
             if (_CheckPreparedToCreate())
             {
                 _CreateNewWorld();
-                _newMapStatus = NewMapStatus.Create;
             }
         }
         if (GUILayout.Button("Save"))
         {
+            _newMapStatus = NewMapStatus.Save;
             var dataUnit = new TileDataUnit
             {
                 Map = _TileUnitMap,
@@ -247,12 +258,20 @@ public class WorldMapEditor : EditorWindow
                 Height = _height,
             };
             SaveData.SaveMap(dataUnit);
-            Debug.Log("save");
+        }
+        if (GUILayout.Button("Load"))
+        {
+            _newMapStatus = NewMapStatus.Load;
+            var mapData = SaveData.LoadMap();
+            if (mapData != null)
+            {
+                _LoadWorldMapTexture(mapData);
+            }
         }
 
     }
 
-    private void _DrawMenuLoadMap()
+    private void _DrawMenuViewMap()
     {
     }
 
@@ -266,10 +285,14 @@ public class WorldMapEditor : EditorWindow
                 break;
             case NewMapStatus.Create:
                 break;
+            case NewMapStatus.Save:
+                break;
+            case NewMapStatus.Load:
+                break;
         }
     }
 
-    private void _DrawMainLoadMap()
+    private void _DrawMainViewMap()
     {
         if (_worldTexture != null)
         {
@@ -288,6 +311,8 @@ public class WorldMapEditor : EditorWindow
             EditorGUILayout.PropertyField(_propertyParamTerrain);
             EditorGUILayout.PropertyField(_propertyParamWeather);
             EditorGUILayout.PropertyField(_propertyBiomeDistribution);
+            EditorGUILayout.PropertyField(_propertyTerrainColorRange);
+            EditorGUILayout.PropertyField(_propertyWeatherColorRange);
             EditorGUILayout.PropertyField(_propertyWidth);
             EditorGUILayout.PropertyField(_propertyHeight);
             if (EditorGUI.EndChangeCheck())
@@ -392,7 +417,7 @@ public class WorldMapEditor : EditorWindow
             {
                 int idx = x * mapData.Width + y;
                 var tileUnit = mapData.Map[idx];
-                _worldTexture.SetPixel(x, y, new Color(tileUnit.Humidity, tileUnit.Height, tileUnit.Temperature));
+                _worldTexture.SetPixel(x, y, _terrainColor.GetLerpColor(tileUnit.Height) );
             }
         }
         _worldTexture.Apply();

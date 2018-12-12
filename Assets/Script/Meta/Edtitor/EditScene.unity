@@ -313,50 +313,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 1256473744}
-  _pixWidth: 1000
-  _pixHeight: 1000
+  _pixWidth: 100
+  _pixHeight: 100
   _heightPercent:
   - 1
   - 2
-  _terrainGrid: 20
-  _terrains:
-  - Grid: 0
-    Color: {r: 0.08893815, g: 0.111006275, b: 0.25735295, a: 1}
-  - Grid: 5
-    Color: {r: 0, g: 0.830781, b: 0.9485294, a: 1}
-  - Grid: 6
-    Color: {r: 0.9961461, g: 1, b: 0.7205882, a: 1}
-  - Grid: 7
-    Color: {r: 0.5481148, g: 0.77205884, b: 0.47685987, a: 1}
-  - Grid: 10
-    Color: {r: 0.15787198, g: 0.53676474, b: 0.160485, a: 1}
-  - Grid: 15
-    Color: {r: 0.15121706, g: 0.30882353, b: 0, a: 1}
-  - Grid: 18
-    Color: {r: 0.4044118, g: 0.24264708, b: 0, a: 1}
-  - Grid: 20
-    Color: {r: 0.6985294, g: 0.6985294, b: 0.6985294, a: 1}
+  _terrainColor: {fileID: 11400000, guid: 48b8aea2d2adb9b4085a22404d2cfbae, type: 2}
   _temperaturePercent:
   - 1
   - 2
-  _temperatureGrid: 10
-  _temperatures:
-  - Grid: 0
-    Color: {r: 0.011713977, g: 0, b: 0.1544118, a: 1}
-  - Grid: 1
-    Color: {r: 0.024847668, g: 0, b: 0.7205882, a: 1}
-  - Grid: 3
-    Color: {r: 0, g: 0.543205, b: 0.7647059, a: 1}
-  - Grid: 5
-    Color: {r: 0.63235295, g: 0.93914807, b: 1, a: 1}
-  - Grid: 5
-    Color: {r: 1, g: 0.993712, b: 0.77205884, a: 1}
-  - Grid: 7
-    Color: {r: 0.78676474, g: 0.439503, b: 0, a: 1}
-  - Grid: 9
-    Color: {r: 0.9705882, g: 0, b: 0, a: 1}
-  - Grid: 10
-    Color: {r: 0.375, g: 0, b: 0, a: 1}
+  _temperatureColor: {fileID: 11400000, guid: de02b1e6fe6127f48a31c69649ddbe46, type: 2}
 --- !u!114 &1256473748
 MonoBehaviour:
   m_ObjectHideFlags: 0
