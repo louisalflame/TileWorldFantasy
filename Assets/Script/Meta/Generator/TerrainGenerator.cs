@@ -34,7 +34,6 @@ public class TerrainGenerator : ITerrainGenerator
     }
 
     private int _sleepCount = 0;
-    private int _sleepMax = 500;
 
     public IEnumerator GenerateHeightMap(
         int width, 
@@ -83,7 +82,7 @@ public class TerrainGenerator : ITerrainGenerator
 
                 _heightMap[idx] = Mathf.Clamp(sample, 0f, 0.999f);
 
-                if (_sleepCount++ > _sleepMax)
+                if (_sleepCount++ > SettingUtility.MapRestCount)
                 {
                     yield return null;
                     _sleepCount = 0;

@@ -58,3 +58,8 @@ public static class MathUtility
         return ans;
     }
 }
+
+public static class SettingUtility
+{
+    public const int MapRestCount = 2000;
+}

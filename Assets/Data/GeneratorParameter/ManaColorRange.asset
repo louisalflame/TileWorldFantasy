@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 917f6e198361ad144928b1e91f3ce6a7, type: 3}
+  m_Name: ManaColorRange
+  m_EditorClassIdentifier: 
+  TotalGrid: 10
+  Colors:
+  - Grid: 0
+    Color: {r: 0.021551702, g: 0.18382353, b: 0, a: 1}
+  - Grid: 1
+    Color: {r: 0.18537791, g: 0.47794116, b: 0.13002811, a: 1}
+  - Grid: 3
+    Color: {r: 0.43139055, g: 0.74264705, b: 0.48505548, a: 1}
+  - Grid: 5
+    Color: {r: 0, g: 0, b: 0, a: 1}
+  - Grid: 5
+    Color: {r: 0, g: 0, b: 0, a: 1}
+  - Grid: 7
+    Color: {r: 0.60294116, g: 0.96713996, b: 1, a: 1}
+  - Grid: 9
+    Color: {r: 0.24751297, g: 0.5264018, b: 0.8014706, a: 1}
+  - Grid: 10
+    Color: {r: 0.38656184, g: 0, b: 0.72794116, a: 1}

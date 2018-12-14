@@ -10,8 +10,7 @@ public class RandomNoise : MonoBehaviour {
     private SpriteView _spriteView;
 
     [SerializeField]
-    private List<Vector2> _points;
-
+    private List<Vector2> _points = new List<Vector2>();
 
     [SerializeField]
     private RandomPointParameter _randomParam;

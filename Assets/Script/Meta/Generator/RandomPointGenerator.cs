@@ -7,10 +7,15 @@ public interface IRandomPointGenerator
 {
     List<Vector2> Points { get; }
     IEnumerator GenerateRandomLocalAreaMap(
-           int width,
-           int height,
-           RandomPointParameter para,
-           IReturn<float[]> ret);
+        int width,
+        int height,
+        RandomPointParameter para,
+        IReturn<float[]> ret);
+    IEnumerator GenerateRandomPoints(
+        int width,
+        int height,
+        int pointNum,
+        RandomPointParameter para);
 }
 
 public class RandomPointGenerator : IRandomPointGenerator
@@ -33,7 +38,19 @@ public class RandomPointGenerator : IRandomPointGenerator
     private List<Vector2> _moves;
 
     private int _sleepCount = 0;
-    private int _sleepMax = 500;
+
+    public IEnumerator GenerateRandomPoints(
+        int width,
+        int height,
+        int pointNum,
+        RandomPointParameter para)
+    {
+        _width = width;
+        _height = height;
+        _para = para;
+
+        yield return _GetRandomLoosePoints(pointNum);
+    }
 
     public IEnumerator GenerateRandomLocalAreaMap(
         int width,
@@ -47,7 +64,7 @@ public class RandomPointGenerator : IRandomPointGenerator
 
         _localAreaMap = new float[_width * _height];
 
-        yield return _GetRandomLoosePoints();
+        yield return _GetRandomLoosePoints(_para.NUM);
 
         yield return _GenerateRandomLocalAreaMap();
 
@@ -88,7 +105,7 @@ public class RandomPointGenerator : IRandomPointGenerator
                 
                 _localAreaMap[y * _width + x] = sample;
 
-                if (_sleepCount++ > _sleepMax)
+                if (_sleepCount++ > SettingUtility.MapRestCount)
                 {
                     yield return null;
                     _sleepCount = 0;
@@ -97,11 +114,11 @@ public class RandomPointGenerator : IRandomPointGenerator
         }
     }
 
-    private IEnumerator _GetRandomLoosePoints()
+    private IEnumerator _GetRandomLoosePoints(int num)
     {
         _points = new List<Vector2>();
 
-        for (int i = 0; i < _para.NUM; i++)
+        for (int i = 0; i < num; i++)
         {
             _points.Add(new Vector2(Random.value, Random.value));
         }
@@ -115,9 +132,9 @@ public class RandomPointGenerator : IRandomPointGenerator
         {
             _ResetMoves();
 
-            for (int i = 0; i < _para.NUM; i++)
+            for (int i = 0; i < _points.Count; i++)
             {
-                for (int j = 0; j < _para.NUM; j++)
+                for (int j = 0; j < _points.Count; j++)
                 {
                     if (i == j) { continue; }
                     _checkOtherPointDistance(i, j);
@@ -135,7 +152,7 @@ public class RandomPointGenerator : IRandomPointGenerator
     private void _ResetMoves()
     {
         _moves = new List<Vector2>();
-        for (int i = 0; i < _para.NUM; i++)
+        for (int i = 0; i < _points.Count; i++)
         {
             _moves.Add(Vector2.zero);
         }
@@ -182,7 +199,7 @@ public class RandomPointGenerator : IRandomPointGenerator
 
     private void _PointsMoves()
     {
-        for (int i = 0; i < _para.NUM; i++)
+        for (int i = 0; i < _points.Count && i < _moves.Count; i++)
         {
             _points[i] += _moves[i];
         }

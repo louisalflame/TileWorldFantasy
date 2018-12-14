@@ -35,7 +35,6 @@ public class WeatherGenerator : IWeatherGenerator
     }
 
     private int _sleepCount = 0;
-    private int _sleepMax = 500;
 
     public IEnumerator GenerateWeatherMap(
         int width,
@@ -73,7 +72,7 @@ public class WeatherGenerator : IWeatherGenerator
 
                 _weatherMap[y * _width + x] = sample;
                  
-                if (_sleepCount++ > _sleepMax)
+                if (_sleepCount++ > SettingUtility.MapRestCount)
                 {
                     yield return null;
                     _sleepCount = 0;

@@ -300,7 +300,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spriteView: {fileID: 1256473747}
   _points: []
-  _randomParam: {fileID: 11400000, guid: 27c443291baf97844bf29d4bf4978f8c, type: 2}
+  _randomParam: {fileID: 11400000, guid: 75bdd52dba4fe6948b5e098276fca769, type: 2}
 --- !u!114 &1256473747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -313,8 +313,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _spriteRenderer: {fileID: 1256473744}
-  _pixWidth: 100
-  _pixHeight: 100
+  _pixWidth: 200
+  _pixHeight: 200
   _heightPercent:
   - 1
   - 2
