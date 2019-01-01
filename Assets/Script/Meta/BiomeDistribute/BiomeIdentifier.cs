@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 public interface IBiomeIdentifier
@@ -13,19 +14,40 @@ public interface IBiomeIdentifier
 public class BasicBiomeIdentifier : IBiomeIdentifier
 {
     private BiomeDistribution _distribution;
-    private float _humudityUnit;
-    private float _heightUnit;
-    private float _temperatureUnit;
+    private float[] _humudityVariety;
+    private float[] _heightVariety;
+    private float[] _temperatureVariety;
 
     public BasicBiomeIdentifier(BiomeDistribution distribution)
     {
         _distribution = distribution;
-        int humudityVariety = _distribution.BiomeHumiditys.Length;
-        int heightVariety = _distribution.BiomeHumiditys[0].BiomeHeights.Length;
-        int temperatureVariety = _distribution.BiomeHumiditys[0].BiomeHeights[0].BiomeTemperatures.Length;
-        _humudityUnit = 1.0f / humudityVariety;
-        _heightUnit = 1.0f / heightVariety;
-        _temperatureUnit = 1.0f / temperatureVariety;
+        int humuditySum = _distribution.HumidityRange.Sum(i => i);
+        int heightSum = _distribution.HeightRange.Sum(i => i);
+        int temperatureSum = _distribution.TemperatureRange.Sum(i => i);
+         
+        float totalHumudity = 0;
+        _humudityVariety = new float[_distribution.HumidityVariety];
+        for (var i = 0; i < _distribution.HumidityVariety; i++)
+        {
+            totalHumudity += _distribution.HumidityRange[i];
+            _humudityVariety[i] = totalHumudity / humuditySum;
+        }
+
+        float totalHeight = 0;
+        _heightVariety = new float[_distribution.HeightVariety];
+        for (var i = 0; i < _distribution.HeightVariety; i++)
+        {
+            totalHeight += _distribution.HeightRange[i];
+            _heightVariety[i] = totalHeight / heightSum;
+        }
+
+        float totalTemperature = 0;
+        _temperatureVariety = new float[_distribution.TemperatureVariety];
+        for (var i = 0; i < _distribution.TemperatureVariety; i++)
+        {
+            totalTemperature += _distribution.TemperatureRange[i];
+            _temperatureVariety[i] = totalTemperature / temperatureSum;
+        }
     }
 
     BiomeData IBiomeIdentifier.IdentifyBiome(
@@ -33,13 +55,25 @@ public class BasicBiomeIdentifier : IBiomeIdentifier
         float height,
         float temperature)
     {
-        Assert.IsTrue(humidity >= 0 && humidity < 1);
-        Assert.IsTrue(height >= 0 && height < 1);
-        Assert.IsTrue(temperature >= 0 && temperature < 1);
+        Assert.IsTrue(humidity >= 0 && humidity <= 1);
+        Assert.IsTrue(height >= 0 && height <= 1);
+        Assert.IsTrue(temperature >= 0 && temperature <= 1);
 
-        var humudityIdx = Mathf.FloorToInt(humidity / _humudityUnit);
-        var heightIdx = Mathf.FloorToInt(height / _heightUnit);
-        var temperatureIdx = Mathf.FloorToInt(temperature / _temperatureUnit);
+        var humudityIdx = 0;
+        for (; humudityIdx < _humudityVariety.Length; humudityIdx++)
+        {
+            if (humidity <= _humudityVariety[humudityIdx]) break;
+        }
+        var heightIdx = 0;
+        for (; heightIdx < _heightVariety.Length; heightIdx++)
+        {
+            if (height <= _heightVariety[heightIdx]) break;
+        }
+        var temperatureIdx = 0;
+        for (; temperatureIdx < _temperatureVariety.Length; temperatureIdx++)
+        {
+            if (temperature <= _temperatureVariety[temperatureIdx]) break;
+        }
 
         var biome = _distribution
             .BiomeHumiditys[humudityIdx]
@@ -47,21 +81,5 @@ public class BasicBiomeIdentifier : IBiomeIdentifier
             .BiomeTemperatures[temperatureIdx];
 
         return biome;
-    }
-
-    public void Check(
-        float humidity,
-        float height,
-        float temperature)
-    {
-        Debug.LogFormat("w:{0}, wu:{1}, idx:{2}",
-            humidity, _humudityUnit,
-            Mathf.FloorToInt(humidity / _humudityUnit));
-        Debug.LogFormat("h:{0}, hu:{1}, idx:{2}",
-            height, _heightUnit,
-            Mathf.FloorToInt(height / _heightUnit));
-        Debug.LogFormat("h:{0}, hu:{1}, idx:{2}",
-            temperature, _temperatureUnit,
-            Mathf.FloorToInt(temperature / _temperatureUnit));
     }
 }

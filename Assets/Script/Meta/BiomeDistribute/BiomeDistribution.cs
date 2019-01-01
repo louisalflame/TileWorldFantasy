@@ -23,5 +23,9 @@ public class BiomeDistribution : ScriptableObject {
     public int HeightVariety = DefaultSize;
     public int TemperatureVariety = DefaultSize;
 
+    public int[] HumidityRange = new int[DefaultSize];
+    public int[] HeightRange = new int[DefaultSize];
+    public int[] TemperatureRange = new int[DefaultSize];
+
     public BiomeHeight[] BiomeHumiditys = new BiomeHeight[DefaultSize];
 }

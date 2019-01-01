@@ -9,7 +9,7 @@ public interface IManaGenerator
     IEnumerator GenerateManaMap(
         int width,
         int height,
-        RandomPointParameter para,
+        ManaParameter para,
         IReturn<float[]> ret);
 }
 
@@ -23,7 +23,8 @@ public class ManaGenerator : IManaGenerator
     private List<Vector2> _midNegPoints;
     private List<Vector2> _lowNegPoints;
 
-    private RandomPointParameter _para;
+    private ManaParameter _para;
+    private RandomPointParameter _randomParam;
     private int _width;
     private int _height;
     private int _sleepCount = 0;
@@ -34,38 +35,51 @@ public class ManaGenerator : IManaGenerator
     public IEnumerator GenerateManaMap(
         int width,
         int height,
-        RandomPointParameter para,
+        ManaParameter para,
         IReturn<float[]> ret)
     {
         _width = width;
         _height = height;
         _para = para;
+        _randomParam = para.RANDOM_POINT_GEN_PARA;
 
         _manaMap = new float[_width * _height];
         _localAreaMap = new float[_width * _height];
 
-        yield return _randPointGen.GenerateRandomPoints(width, height, 20, _para);
+        var totalPoints =
+            _para.POSITIVE_HIGH_POINTS_NUM +
+            _para.POSITIVE_MID_POINTS_NUM +
+            _para.POSITIVE_LOW_POINTS_NUM +
+            _para.NEGATIVE_HIGH_POINTS_NUM +
+            _para.NEGATIVE_MID_POINTS_NUM +
+            _para.NEGATIVE_LOW_POINTS_NUM;
+
+        yield return _randPointGen.GenerateRandomPoints(
+            width, 
+            height, 
+            totalPoints,
+            _randomParam);
 
         var points = _randPointGen.Points.OrderBy(i => Random.value).ToList();
 
-        _highPosPoints = points.Take(2).ToList();
-        points = points.Skip(2).ToList();
-        _midPosPoints = points.Take(3).ToList();
-        points = points.Skip(3).ToList();
-        _lowPosPoints = points.Take(5).ToList();
-        points = points.Skip(5).ToList();
-        _highNegPoints = points.Take(2).ToList();
-        points = points.Skip(2).ToList();
-        _midNegPoints = points.Take(3).ToList();
-        points = points.Skip(3).ToList();
-        _lowNegPoints = points.Take(5).ToList();
+        _highPosPoints = points.Take(_para.POSITIVE_HIGH_POINTS_NUM).ToList();
+        points = points.Skip(_para.POSITIVE_HIGH_POINTS_NUM).ToList();
+        _midPosPoints = points.Take(_para.POSITIVE_HIGH_POINTS_NUM).ToList();
+        points = points.Skip(_para.POSITIVE_HIGH_POINTS_NUM).ToList();
+        _lowPosPoints = points.Take(_para.POSITIVE_LOW_POINTS_NUM).ToList();
+        points = points.Skip(_para.POSITIVE_LOW_POINTS_NUM).ToList();
+        _highNegPoints = points.Take(_para.NEGATIVE_HIGH_POINTS_NUM).ToList();
+        points = points.Skip(_para.NEGATIVE_HIGH_POINTS_NUM).ToList();
+        _midNegPoints = points.Take(_para.NEGATIVE_MID_POINTS_NUM).ToList();
+        points = points.Skip(_para.NEGATIVE_MID_POINTS_NUM).ToList();
+        _lowNegPoints = points.Take(_para.NEGATIVE_LOW_POINTS_NUM).ToList();
 
-        yield return _GenerateRandomLocalAreaMap(_highPosPoints, 0.1f, 3);
-        yield return _GenerateRandomLocalAreaMap(_midPosPoints, 0.08f, 2);
-        yield return _GenerateRandomLocalAreaMap(_lowPosPoints, 0.06f, 1);
-        yield return _GenerateRandomLocalAreaMap(_highNegPoints, 0.1f, -3);
-        yield return _GenerateRandomLocalAreaMap(_midNegPoints, 0.08f, -2);
-        yield return _GenerateRandomLocalAreaMap(_lowNegPoints, 0.06f, -1);
+        yield return _GenerateRandomLocalAreaMap(_highPosPoints, _para.POSITIVE_HIGH_RADIUS, _para.POSITIVE_HIGH_FACTOR);
+        yield return _GenerateRandomLocalAreaMap(_midPosPoints, _para.POSITIVE_MID_RADIUS, _para.POSITIVE_MID_FACTOR);
+        yield return _GenerateRandomLocalAreaMap(_lowPosPoints, _para.POSITIVE_LOW_RADIUS, _para.POSITIVE_LOW_FACTOR);
+        yield return _GenerateRandomLocalAreaMap(_highNegPoints, _para.NEGATIVE_HIGH_RADIUS, _para.NEGATIVE_HIGH_FACTOR);
+        yield return _GenerateRandomLocalAreaMap(_midNegPoints, _para.NEGATIVE_MID_RADIUS, _para.NEGATIVE_MID_FACTOR);
+        yield return _GenerateRandomLocalAreaMap(_lowNegPoints, _para.NEGATIVE_LOW_RADIUS, _para.NEGATIVE_LOW_FACTOR);
 
         for (int x = 0; x < _width; x++)
         {
@@ -87,6 +101,7 @@ public class ManaGenerator : IManaGenerator
             {
                 float xCoord = (float)x / _width;
                 float yCoord = (float)y / _height;
+                var idx = MathUtility.MapIndex(x, y, _height);
                 var coord = new Vector2(xCoord, yCoord);
 
                 float sample = 0;
@@ -94,24 +109,24 @@ public class ManaGenerator : IManaGenerator
                 for (int i = 0; i < points.Count; i++)
                 {
                     float distance = Vector2.Distance(points[i], coord);
-                    float upDegree = radius > distance ?
-                        radius - distance : 0;
+                    if (distance >= radius)
+                        continue;
 
-                    float upHeight = _para.LOCAL_AREA_SCALE * upDegree;
+                    float upDegree = radius - distance;
 
                     float upNoise = NoiseUtility.CountRecursivePerlinNoise(
                         xCoord,
                         yCoord,
-                        _para.LOCAL_XOFFSET,
-                        _para.LOCAL_YOFFSET,
-                        _para.LOCAL_SCALE,
-                        _para.LOCAL_FREQ_COUNT_TIMES,
-                        _para.LOCAL_FREQ_GROW_FACTOR);
+                        _randomParam.LOCAL_XOFFSET,
+                        _randomParam.LOCAL_YOFFSET,
+                        _randomParam.LOCAL_SCALE,
+                        _randomParam.LOCAL_FREQ_COUNT_TIMES,
+                        _randomParam.LOCAL_FREQ_GROW_FACTOR);
 
-                    sample += upNoise * upHeight * posOrNegfactor;
+                    sample += upNoise * upDegree * posOrNegfactor;
                 }
 
-                _localAreaMap[y * _width + x] += sample;
+                _localAreaMap[idx] += sample;
 
                 if (_sleepCount++ > SettingUtility.MapRestCount)
                 {

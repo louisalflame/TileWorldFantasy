@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "World/ColorRange", order = 14)]
+[CreateAssetMenu(menuName = "World/ColorRange", order = 21)]
 public class ColorRangeDistribution : ScriptableObject
 {
     public int TotalGrid;

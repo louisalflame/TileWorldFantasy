@@ -79,6 +79,7 @@ public class RandomPointGenerator : IRandomPointGenerator
             {
                 float xCoord = (float)x / _width;
                 float yCoord = (float)y / _height;
+                int idx = MathUtility.MapIndex(x, y, _height);
                 var coord = new Vector2(xCoord, yCoord);
 
                 float sample = 0;
@@ -86,9 +87,10 @@ public class RandomPointGenerator : IRandomPointGenerator
                 for (int i = 0; i < _points.Count; i++)
                 {
                     float distance = Vector2.Distance(_points[i], coord);
-                    float upDegree = _para.LOCAL_AREA_RADIUS > distance ?
-                        _para.LOCAL_AREA_RADIUS - distance : 0;
+                    if (distance >= _para.LOCAL_AREA_RADIUS)
+                        continue;
 
+                    float upDegree = _para.LOCAL_AREA_RADIUS - distance;
                     float upHeight = _para.LOCAL_AREA_SCALE * upDegree; 
 
                     float upNoise = NoiseUtility.CountRecursivePerlinNoise(
@@ -103,7 +105,7 @@ public class RandomPointGenerator : IRandomPointGenerator
                     sample += upNoise * upHeight;
                 }
                 
-                _localAreaMap[y * _width + x] = sample;
+                _localAreaMap[idx] = sample;
 
                 if (_sleepCount++ > SettingUtility.MapRestCount)
                 {

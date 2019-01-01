@@ -57,6 +57,11 @@ public static class MathUtility
 
         return ans;
     }
+
+    public static int MapIndex(int x, int y, int height)
+    {
+        return x * height + y;
+    }
 }
 
 public static class SettingUtility

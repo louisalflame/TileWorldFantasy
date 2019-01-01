@@ -73,10 +73,9 @@ public class TerrainGenerator : ITerrainGenerator
         {
             for (int y = 0; y < _height; y++)
             {
-                int idx = x * _height + y;
-
                 float xCoord = (float)x / _width;
                 float yCoord = (float)y / _height;
+                int idx = MathUtility.MapIndex(x, y, _height);
 
                 var sample = _CountPerlinNoise(idx, xCoord, yCoord);
 

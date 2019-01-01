@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 718512564d42c2841947c90cde987932, type: 3}
+  m_Name: BasicParamTemperature
+  m_EditorClassIdentifier: 
+  MAIN_TEMPERATURE_MIN: 0.2
+  MAIN_TEMPERATURE_MAX: 0.8
+  VARIETY_TEMPERATURE_MAX: 0.6
+  WEATHER_GEN_PARA: {fileID: 11400000, guid: 4409a63bd61cf36439ca6534a2ab13d5, type: 2}

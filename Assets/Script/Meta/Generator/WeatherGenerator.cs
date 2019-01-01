@@ -56,31 +56,8 @@ public class WeatherGenerator : IWeatherGenerator
 
         ret.Accept(_weatherMap);
     }
-    
-    private IEnumerator _GenerateWeatherMap()
-    { 
-        for (int x = 0; x < _width; x++)
-        {
-            for (int y = 0; y < _height; y++)
-            {
-                float xCoord = (float)x / _width;
-                float yCoord = (float)y / _height;
 
-                float sample = _CountPerlinNoise(xCoord, yCoord);
-
-                sample = _TempratureChange(sample);
-
-                _weatherMap[y * _width + x] = sample;
-                 
-                if (_sleepCount++ > SettingUtility.MapRestCount)
-                {
-                    yield return null;
-                    _sleepCount = 0;
-                }
-            }
-        }
-    }
-
+    #region ChangeWeather
     public IEnumerator ChangeToNextWeather(IReturn<float[]> ret)
     {
         if (_para == null || _weatherMap == null)
@@ -93,22 +70,6 @@ public class WeatherGenerator : IWeatherGenerator
         yield return _GenerateWeatherMap();
 
         ret.Accept(_weatherMap);
-    }
-
-    private float _CountPerlinNoise(float xCoord, float yCoord)
-    {
-        float sample = 0f;
-
-        sample += NoiseUtility.CountRecursivePerlinNoise(
-            xCoord + _varietyStatus.XOffset,
-            yCoord + _varietyStatus.YOffset,
-            0,
-            0,
-            _para.SCALE,
-            _para.FREQ_COUNT_TIMES,
-            _para.FREQ_GROW_FACTOR);
-
-        return sample;
     }
 
     public void NextRandom()
@@ -131,6 +92,48 @@ public class WeatherGenerator : IWeatherGenerator
             _varietyStatus.WeatherShift -= Random.Range(_para.WEATHER_SHIFT_MIN, _para.WEATHER_SHIFT_MAX);
             _varietyStatus.GoWarm = _varietyStatus.WeatherShift < _para.COLDDOWN_MAX;
         }
+    }
+    #endregion
+
+    private IEnumerator _GenerateWeatherMap()
+    { 
+        for (int x = 0; x < _width; x++)
+        {
+            for (int y = 0; y < _height; y++)
+            {
+                float xCoord = (float)x / _width;
+                float yCoord = (float)y / _height;
+                var idx = MathUtility.MapIndex(x, y, _height);
+
+                float sample = _CountPerlinNoise(xCoord, yCoord);
+
+                sample = _TempratureChange(sample);
+
+                _weatherMap[idx] = sample;
+                 
+                if (_sleepCount++ > SettingUtility.MapRestCount)
+                {
+                    yield return null;
+                    _sleepCount = 0;
+                }
+            }
+        }
+    }
+
+    private float _CountPerlinNoise(float xCoord, float yCoord)
+    {
+        float sample = 0f;
+
+        sample += NoiseUtility.CountRecursivePerlinNoise(
+            xCoord + _varietyStatus.XOffset,
+            yCoord + _varietyStatus.YOffset,
+            0,
+            0,
+            _para.SCALE,
+            _para.FREQ_COUNT_TIMES,
+            _para.FREQ_GROW_FACTOR);
+
+        return sample;
     }
      
     private float _TempratureChange(float sample)

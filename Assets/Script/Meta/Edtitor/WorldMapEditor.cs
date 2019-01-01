@@ -1,5 +1,4 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -73,6 +72,10 @@ public class WorldMapEditor : EditorWindow
     [SerializeField]
     private WeatherParameter _paramWeather;
     [SerializeField]
+    private TemperatureParameter _paramTemperature;
+    [SerializeField]
+    private ManaParameter _paramMana;
+    [SerializeField]
     private RainParameter _paramRain;
     [SerializeField]
     private BiomeDistribution _biomeDistribution;
@@ -94,6 +97,8 @@ public class WorldMapEditor : EditorWindow
     private SerializedObject _serializedObj;
     private SerializedProperty _propertyParamTerrain;
     private SerializedProperty _propertyParamWeather;
+    private SerializedProperty _propertyParamTemperature;
+    private SerializedProperty _propertyParamMana;
     private SerializedProperty _propertyParamRain;
     private SerializedProperty _propertyBiomeDistribution;
     private SerializedProperty _propertyTerrainColorRange;
@@ -106,6 +111,8 @@ public class WorldMapEditor : EditorWindow
 
     private const string _terrainParamPath = "Assets/Data/GeneratorParameter/BasicParamTerrain.asset";
     private const string _weatherParamPath = "Assets/Data/GeneratorParameter/BasicParamWeather.asset";
+    private const string _temperatureParamPath = "Assets/Data/GeneratorParameter/BasicParamTemperature.asset";
+    private const string _manaParamPath = "Assets/Data/GeneratorParameter/BasicParamMana.asset";
     private const string _rainParamPath = "Assets/Data/GeneratorParameter/BasicParamRain.asset";
     private const string _biomeDistributionPath = "Assets/Data/BiomeDistribute/NormalBiomeDistribution.asset";
     private const string _terrainColorRangePath = "Assets/Data/GeneratorParameter/TerrainColorRange.asset";
@@ -114,13 +121,14 @@ public class WorldMapEditor : EditorWindow
     private const string _rainColorRangePath = "Assets/Data/GeneratorParameter/RainColorRange.asset";
 
     private string _noticeTxt;
+    private string _descriptionTxt;
     private Texture2D _worldTexture = null;
     private TileDataUnit _tileData = null;
     private Executor _executor = new Executor();
 
     //Create 
     private ITerrainGenerator _terrainGen = new TerrainGenerator();
-    private IWeatherGenerator _temperatureGen = new WeatherGenerator();
+    private ITemperatureGenerator _temperatureGen = new TemperatureGenerator();
     private IWeatherGenerator _humidityGen = new WeatherGenerator();
     private IManaGenerator _manaGen = new ManaGenerator();
     private IRiverGenerator _riverGen = new RiverGenerator();
@@ -129,6 +137,8 @@ public class WorldMapEditor : EditorWindow
     {
         _paramTerrain = (TerrainParameter)AssetDatabase.LoadAssetAtPath(_terrainParamPath, typeof(TerrainParameter));
         _paramWeather = (WeatherParameter)AssetDatabase.LoadAssetAtPath(_weatherParamPath, typeof(WeatherParameter));
+        _paramTemperature = (TemperatureParameter)AssetDatabase.LoadAssetAtPath(_temperatureParamPath, typeof(TemperatureParameter));
+        _paramMana = (ManaParameter)AssetDatabase.LoadAssetAtPath(_manaParamPath, typeof(ManaParameter));
         _paramRain = (RainParameter)AssetDatabase.LoadAssetAtPath(_rainParamPath, typeof(RainParameter));
         _biomeDistribution = (BiomeDistribution)AssetDatabase.LoadAssetAtPath(_biomeDistributionPath, typeof(BiomeDistribution));
         _terrainColor = (ColorRangeDistribution)AssetDatabase.LoadAssetAtPath(_terrainColorRangePath, typeof(ColorRangeDistribution));
@@ -139,6 +149,8 @@ public class WorldMapEditor : EditorWindow
         _serializedObj = new SerializedObject(this);
         _propertyParamTerrain = _serializedObj.FindProperty("_paramTerrain");
         _propertyParamWeather = _serializedObj.FindProperty("_paramWeather");
+        _propertyParamTemperature = _serializedObj.FindProperty("_paramTemperature");
+        _propertyParamMana = _serializedObj.FindProperty("_paramMana");
         _propertyParamRain = _serializedObj.FindProperty("_paramRain");
         _propertyBiomeDistribution = _serializedObj.FindProperty("_biomeDistribution");
         _propertyTerrainColorRange = _serializedObj.FindProperty("_terrainColor");
@@ -162,6 +174,7 @@ public class WorldMapEditor : EditorWindow
     private bool _initialGUI = false;
     private GUIStyle _mapStyle;
     private GUIStyle _menuStyle;
+    private GUIStyle _subMenuStyle;
     private void _OnGUI()
     {
         if (EditorApplication.isCompiling)
@@ -218,6 +231,11 @@ public class WorldMapEditor : EditorWindow
                     _DrawMenu();
                 }
                 EditorGUILayout.EndVertical();
+                EditorGUILayout.BeginVertical(_subMenuStyle);
+                {
+                    _DrawSubMenu();
+                }
+                EditorGUILayout.EndVertical();
                 EditorGUILayout.BeginVertical();
                 {
                     _DrawMain();
@@ -233,18 +251,17 @@ public class WorldMapEditor : EditorWindow
 
     private void _InitGUI()
     {
-        _mapStyle = new GUIStyle
-        {
-            fixedHeight = 0,
-            fixedWidth = 0,
-            stretchHeight = true,
-            stretchWidth = true,
-            border = new RectOffset (0,0,0,0),
-            overflow = new RectOffset(0, 0, 0, 0),
-        };
         _menuStyle = new GUIStyle
         {
             fixedWidth = 130
+        };
+        _subMenuStyle = new GUIStyle
+        {
+            fixedWidth = 160
+        };
+        _mapStyle = new GUIStyle
+        {
+            fixedHeight = 200,
         };
     }
 
@@ -272,6 +289,16 @@ public class WorldMapEditor : EditorWindow
                 break;
             case MainMenuStatus.ViewMap:
                 _DrawMenuViewMap();
+                break;
+        }
+    }
+
+    private void _DrawSubMenu()
+    {
+        switch (_viewMapStatus)
+        {
+            case ViewMapStatus.Terrain:
+                _DrawSubMenuTerrain();
                 break;
         }
     }
@@ -381,6 +408,21 @@ public class WorldMapEditor : EditorWindow
         }
     }
 
+    private void _DrawSubMenuTerrain()
+    {
+        foreach (var biomeName in System.Enum.GetNames(typeof(Biome)))
+        {
+            if (GUILayout.Button(biomeName))
+            {
+                var biome = (Biome)(System.Enum.Parse(typeof(Biome), biomeName));
+                if (_tileData != null)
+                {
+                    _ShowTerrainBiomeMap(_tileData, biome);
+                }
+            }
+        }
+    }
+
     private void _DrawMainNewMap()
     {
         EditorGUILayout.LabelField(_noticeTxt);
@@ -400,12 +442,24 @@ public class WorldMapEditor : EditorWindow
 
     private void _DrawMainViewMap()
     {
-        if (_worldTexture != null)
+        EditorGUILayout.BeginHorizontal();
         {
-            EditorGUILayout.LabelField(_noticeTxt);
-            var rect = GUILayoutUtility.GetLastRect();
-            GUI.DrawTexture(new Rect(rect.min.x, rect.min.y + rect.height +10, 200, 200), _worldTexture, ScaleMode.ScaleToFit);
+            EditorGUILayout.BeginVertical(_mapStyle);
+            {
+                if (_worldTexture != null)
+                {
+                    EditorGUILayout.LabelField(_noticeTxt);
+                    var rect = GUILayoutUtility.GetLastRect();
+                    GUI.DrawTexture(new Rect(rect.min.x, rect.min.y + rect.height + 10, 200, 200), _worldTexture, ScaleMode.ScaleToFit);
+                }
+            }
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.BeginVertical(_subMenuStyle);
+            EditorGUILayout.LabelField(_descriptionTxt);
+            EditorGUILayout.EndVertical();
         }
+        EditorGUILayout.EndHorizontal();
     }
     #endregion
 
@@ -417,6 +471,8 @@ public class WorldMapEditor : EditorWindow
             EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(_propertyParamTerrain);
             EditorGUILayout.PropertyField(_propertyParamWeather);
+            EditorGUILayout.PropertyField(_propertyParamTemperature);
+            EditorGUILayout.PropertyField(_propertyParamMana);
             EditorGUILayout.PropertyField(_propertyParamRain);
             EditorGUILayout.PropertyField(_propertyBiomeDistribution);
             EditorGUILayout.PropertyField(_propertyTerrainColorRange);
@@ -484,13 +540,13 @@ public class WorldMapEditor : EditorWindow
                 _height,
                 Random.Range(0, 10000),
                 Random.Range(0, 10000),
-                _paramWeather,
+                _paramTemperature,
                 r));
         var genManaMonad = new BlockMonad<float[]>(r =>
             _manaGen.GenerateManaMap(
                 _width,
                 _height, 
-                _paramTerrain.RANDOM_POINT_GEN_PARA,
+                _paramMana,
                 r));
 
         Debug.Log("start genTerrainMonad");
@@ -554,6 +610,7 @@ public class WorldMapEditor : EditorWindow
     }
     #endregion
 
+    #region ViewMapTexture
     private void _ShowWorldMapTexture(TileDataUnit mapData)
     {
         _noticeTxt = string.Format("Load Map  - {0}*{1}", mapData.Width, mapData.Height);
@@ -571,6 +628,24 @@ public class WorldMapEditor : EditorWindow
         }
         _worldTexture.Apply();
     }
+
+    private void _ShowTerrainBiomeMap(TileDataUnit mapData, Biome biome)
+    {
+        _worldTexture = new Texture2D(mapData.Width, mapData.Height);
+        for (int x = 0; x < mapData.Width; x++)
+        {
+            for (int y = 0; y < mapData.Height; y++)
+            {
+                int idx = x * mapData.Width + y;
+                var tileUnit = mapData.Map[idx];
+                var color = _terrainColor.GetLerpColor(tileUnit.Height);
+                color.a = (tileUnit.Biome == biome) ? 1 : 0.2f;
+                _worldTexture.SetPixel(x, y, color);
+            }
+        }
+        _worldTexture.Apply();
+    }
+    #endregion
 
     private Color _GetColorOfTypeRange(TileUnit unit)
     {

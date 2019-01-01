@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "World/ParamTerrain", order = 16)]
+[CreateAssetMenu(menuName = "World/ParamRain", order = 15)]
 public class RainParameter : ScriptableObject
 {
     public float HEIGHT_LOCATIONS;
