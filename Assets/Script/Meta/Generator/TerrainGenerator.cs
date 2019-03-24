@@ -19,14 +19,13 @@ public class TerrainGenerator : ITerrainGenerator
 {
     private TerrainParameter _para; 
     
+    private int _width;
+    private int _height;
     private float _xOffset;
     private float _yOffset;
      
     private IRandomPointGenerator _randPointGen = new RandomPointGenerator();
     private float[] _localAreaMap;
-
-    private int _width;
-    private int _height;
 
     private float[] _heightMap;
     public float[] HeightMap {

@@ -9,6 +9,14 @@ public interface IBiomeIdentifier
         float temperature,
         float humidity
     );
+
+    int GetHeightVarietyIndex(float height);
+    int GetTemperatureVarietyIndex(float temperature);
+    int GetHumidityVarietyIndex(float humidity);
+
+    bool IsHeightInVarietyIndex(float height, int index);
+    bool IsTemperatureInVarietyIndex(float temperature, int index);
+    bool IsHumidityInVarietyIndex(float humidity, int index);
 }
 
 public class BasicBiomeIdentifier : IBiomeIdentifier
@@ -59,21 +67,9 @@ public class BasicBiomeIdentifier : IBiomeIdentifier
         Assert.IsTrue(height >= 0 && height <= 1);
         Assert.IsTrue(temperature >= 0 && temperature <= 1);
 
-        var humudityIdx = 0;
-        for (; humudityIdx < _humudityVariety.Length; humudityIdx++)
-        {
-            if (humidity <= _humudityVariety[humudityIdx]) break;
-        }
-        var heightIdx = 0;
-        for (; heightIdx < _heightVariety.Length; heightIdx++)
-        {
-            if (height <= _heightVariety[heightIdx]) break;
-        }
-        var temperatureIdx = 0;
-        for (; temperatureIdx < _temperatureVariety.Length; temperatureIdx++)
-        {
-            if (temperature <= _temperatureVariety[temperatureIdx]) break;
-        }
+        var humudityIdx = GetHumidityVarietyIndex(humidity);
+        var heightIdx = GetHeightVarietyIndex(height);
+        var temperatureIdx = GetTemperatureVarietyIndex(temperature);
 
         var biome = _distribution
             .BiomeHumiditys[humudityIdx]
@@ -81,5 +77,55 @@ public class BasicBiomeIdentifier : IBiomeIdentifier
             .BiomeTemperatures[temperatureIdx];
 
         return biome;
+    }
+
+    public int GetHeightVarietyIndex(float height)
+    {
+        var heightIdx = 0;
+        for (; heightIdx < _heightVariety.Length; heightIdx++)
+        {
+            if (height <= _heightVariety[heightIdx]) break;
+        }
+        return heightIdx;
+    }
+    public int GetTemperatureVarietyIndex(float temperature)
+    {
+        var temperatureIdx = 0;
+        for (; temperatureIdx < _temperatureVariety.Length; temperatureIdx++)
+        {
+            if (temperature <= _temperatureVariety[temperatureIdx]) break;
+        }
+        return temperatureIdx;
+    }
+    public int GetHumidityVarietyIndex(float humidity)
+    {
+        var humudityIdx = 0;
+        for (; humudityIdx < _humudityVariety.Length; humudityIdx++)
+        {
+            if (humidity <= _humudityVariety[humudityIdx]) break;
+        }
+        return humudityIdx;
+    }
+
+    public bool IsHeightInVarietyIndex(float height, int index)
+    {
+        if (index == 0)
+            return height <= _heightVariety[index];
+        else
+            return (height <= _heightVariety[index]) && (height > _heightVariety[index - 1]);
+    }
+    public bool IsTemperatureInVarietyIndex(float temperature, int index)
+    {
+        if (index == 0)
+            return temperature <= _temperatureVariety[index];
+        else
+            return (temperature <= _temperatureVariety[index]) && (temperature > _temperatureVariety[index - 1]);
+    }
+    public bool IsHumidityInVarietyIndex(float humidity, int index)
+    {
+        if (index == 0)
+            return humidity <= _humudityVariety[index];
+        else
+            return (humidity <= _humudityVariety[index]) && (humidity > _humudityVariety[index - 1]);
     }
 }

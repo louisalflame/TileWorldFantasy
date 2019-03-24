@@ -66,5 +66,5 @@ public static class MathUtility
 
 public static class SettingUtility
 {
-    public const int MapRestCount = 2000;
+    public const int MapRestCount = 20000;
 }

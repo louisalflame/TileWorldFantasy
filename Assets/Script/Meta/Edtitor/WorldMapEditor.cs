@@ -58,6 +58,7 @@ public class WorldMapEditor : EditorWindow
     {
         None,
         Terrain,
+        Biome,
         Humudity,
         Temperature,
         Mana,
@@ -121,7 +122,7 @@ public class WorldMapEditor : EditorWindow
     private const string _rainColorRangePath = "Assets/Data/GeneratorParameter/RainColorRange.asset";
 
     private string _noticeTxt;
-    private string _descriptionTxt;
+    private string _descriptionTxt = string.Empty;
     private Texture2D _worldTexture = null;
     private TileDataUnit _tileData = null;
     private Executor _executor = new Executor();
@@ -269,6 +270,7 @@ public class WorldMapEditor : EditorWindow
     {
         if (GUILayout.Button("New Map", GUILayout.Width(200)))
         {
+            _viewMapStatus = ViewMapStatus.None;
             _mainMenuStatus = MainMenuStatus.NewMap;
             _noticeTxt = string.Empty;
         }
@@ -295,10 +297,21 @@ public class WorldMapEditor : EditorWindow
 
     private void _DrawSubMenu()
     {
+        if (_tileData == null) return;
+
         switch (_viewMapStatus)
         {
             case ViewMapStatus.Terrain:
-                _DrawSubMenuTerrain();
+                _DrawSubMenuTerrian();
+                break;
+            case ViewMapStatus.Biome:
+                _DrawSubMenuBiome();
+                break;
+            case ViewMapStatus.Temperature:
+                _DrawSubMenuTemperature();
+                break;
+            case ViewMapStatus.Humudity:
+                _DrawSubMenuHumidity();
                 break;
         }
     }
@@ -370,6 +383,15 @@ public class WorldMapEditor : EditorWindow
                 _noticeTxt = string.Format("Terrain map: {0}*{1}", _tileData.Width, _tileData.Height);
             }
         }
+        if (GUILayout.Button("Biome"))
+        {
+            _viewMapStatus = ViewMapStatus.Biome;
+            if (_tileData != null && _terrainColor != null)
+            {
+                _ShowWorldMapTexture(_tileData);
+                _noticeTxt = string.Format("Biome map: {0}*{1}", _tileData.Width, _tileData.Height);
+            }
+        }
         if (GUILayout.Button("Humudity"))
         {
             _viewMapStatus = ViewMapStatus.Humudity;
@@ -408,17 +430,83 @@ public class WorldMapEditor : EditorWindow
         }
     }
 
-    private void _DrawSubMenuTerrain()
+    private void _DrawSubMenuBiome()
     {
         foreach (var biomeName in System.Enum.GetNames(typeof(Biome)))
         {
-            if (GUILayout.Button(biomeName))
+            if (GUILayout.Button(biomeName, GUILayout.MinWidth(200)))
             {
+                var count = 0;
                 var biome = (Biome)(System.Enum.Parse(typeof(Biome), biomeName));
-                if (_tileData != null)
-                {
-                    _ShowTerrainBiomeMap(_tileData, biome);
-                }
+                _ShowTerrainMapCondition(_tileData, (t) => {
+                    bool valid = t.Biome == biome;
+                    count += valid ? 1 : 0;
+                    return valid;
+                });
+                _descriptionTxt = string.Format("num: {0}", count);
+            }
+        }
+    }
+
+    private void _DrawSubMenuTerrian()
+    {
+        if (_biomeDistribution == null) return;
+
+        IBiomeIdentifier identifier = new BasicBiomeIdentifier(_biomeDistribution);
+        for (var i = 0; i < _biomeDistribution.HeightVariety; i++)
+        {
+            var heightNo = string.Format("Height {0}", i.ToString());
+            if (GUILayout.Button(heightNo, GUILayout.MinWidth(200)))
+            {
+                var count = 0;
+                _ShowTerrainMapCondition(_tileData, (t) => {
+                    bool valid = identifier.IsHeightInVarietyIndex(t.Height, i);
+                    count += valid ? 1 : 0;
+                    return valid;
+                });
+                _descriptionTxt = string.Format("num: {0}", count);
+            }
+        }
+    }
+
+    private void _DrawSubMenuTemperature()
+    {
+        if (_biomeDistribution == null) return;
+
+        IBiomeIdentifier identifier = new BasicBiomeIdentifier(_biomeDistribution);
+        for (var i = 0; i < _biomeDistribution.TemperatureVariety; i++)
+        {
+            var tempNo = string.Format("Temperature {0}", i.ToString());
+            if (GUILayout.Button(tempNo, GUILayout.MinWidth(200)))
+            {
+                var count = 0;
+                _ShowTerrainMapCondition(_tileData, (t) => {
+                    bool valid = identifier.IsTemperatureInVarietyIndex(t.Temperature, i);
+                    count += valid ? 1 : 0;
+                    return valid;
+                });
+                _descriptionTxt = string.Format("num: {0}", count);
+            }
+        }
+    }
+
+    private void _DrawSubMenuHumidity()
+    {
+        if (_biomeDistribution == null) return;
+
+        IBiomeIdentifier identifier = new BasicBiomeIdentifier(_biomeDistribution);
+        for (var i = 0; i < _biomeDistribution.HumidityVariety; i++)
+        {
+            var humidityNo = string.Format("Humidity {0}", i.ToString());
+            if (GUILayout.Button(humidityNo, GUILayout.MinWidth(200)))
+            {
+                var count = 0;
+                _ShowTerrainMapCondition(_tileData, (t) => {
+                    bool valid = identifier.IsHumidityInVarietyIndex(t.Humidity, i);
+                    count += valid ? 1 : 0;
+                    return valid;
+                });
+                _descriptionTxt = string.Format("num: {0}", count);
             }
         }
     }
@@ -581,7 +669,7 @@ public class WorldMapEditor : EditorWindow
         {
             for (int y = 0; y < _height; y++)
             {
-                int idx = y * _width + x;
+                var idx = MathUtility.MapIndex(x, y, _height);
 
                 var height = terrainMap[idx];
                 var humidity = humidityMap[idx];
@@ -619,7 +707,7 @@ public class WorldMapEditor : EditorWindow
         {
             for (int y = 0; y < mapData.Height; y++)
             {
-                int idx = x * mapData.Width + y;
+                var idx = MathUtility.MapIndex(x, y, _height);
                 var tileUnit = mapData.Map[idx];
                 var color = _GetColorOfTypeRange(tileUnit);
 
@@ -629,17 +717,17 @@ public class WorldMapEditor : EditorWindow
         _worldTexture.Apply();
     }
 
-    private void _ShowTerrainBiomeMap(TileDataUnit mapData, Biome biome)
+    private void _ShowTerrainMapCondition(TileDataUnit mapData, System.Func<TileUnit, bool> isValid)
     {
         _worldTexture = new Texture2D(mapData.Width, mapData.Height);
         for (int x = 0; x < mapData.Width; x++)
         {
             for (int y = 0; y < mapData.Height; y++)
             {
-                int idx = x * mapData.Width + y;
+                var idx = MathUtility.MapIndex(x, y, _height);
                 var tileUnit = mapData.Map[idx];
                 var color = _terrainColor.GetLerpColor(tileUnit.Height);
-                color.a = (tileUnit.Biome == biome) ? 1 : 0.2f;
+                color.a = isValid(tileUnit) ? 1 : 0.2f;
                 _worldTexture.SetPixel(x, y, color);
             }
         }
@@ -651,6 +739,7 @@ public class WorldMapEditor : EditorWindow
     {
         switch (_viewMapStatus)
         {
+            case ViewMapStatus.Biome:
             case ViewMapStatus.Terrain:
                 return _terrainColor.GetLerpColor(unit.Height);
             case ViewMapStatus.Humudity:

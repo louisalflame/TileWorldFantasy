@@ -11,7 +11,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5dc1e3d7f23e2ca4c9e485e0e9c561b6, type: 3}
   m_Name: BasicParamWeather
   m_EditorClassIdentifier: 
-  SCALE: 6
+  SCALE: 4
   FREQ_COUNT_TIMES: 2
   FREQ_GROW_FACTOR: 2
   SPEED_SCALE_MIN: 0
