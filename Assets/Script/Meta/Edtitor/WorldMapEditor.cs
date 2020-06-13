@@ -63,6 +63,7 @@ public class WorldMapEditor : EditorWindow
         Temperature,
         Mana,
         River,
+        Population
     }
     private MainMenuStatus _mainMenuStatus = MainMenuStatus.None;
     private NewMapStatus _newMapStatus = NewMapStatus.None;
@@ -78,6 +79,8 @@ public class WorldMapEditor : EditorWindow
     private ManaParameter _paramMana;
     [SerializeField]
     private RainParameter _paramRain;
+    [SerializeField]
+    private PopulationParameter _paramPopulation;
     [SerializeField]
     private BiomeDistribution _biomeDistribution;
     [SerializeField]
@@ -101,6 +104,7 @@ public class WorldMapEditor : EditorWindow
     private SerializedProperty _propertyParamTemperature;
     private SerializedProperty _propertyParamMana;
     private SerializedProperty _propertyParamRain;
+    private SerializedProperty _propertyParamPopulation;
     private SerializedProperty _propertyBiomeDistribution;
     private SerializedProperty _propertyTerrainColorRange;
     private SerializedProperty _propertyWeatherColorRange;
@@ -115,6 +119,7 @@ public class WorldMapEditor : EditorWindow
     private const string _temperatureParamPath = "Assets/Data/GeneratorParameter/BasicParamTemperature.asset";
     private const string _manaParamPath = "Assets/Data/GeneratorParameter/BasicParamMana.asset";
     private const string _rainParamPath = "Assets/Data/GeneratorParameter/BasicParamRain.asset";
+    private const string _populationParamPath = "Assets/Data/PopulationDistribute/BasicParamPopulation.asset";
     private const string _biomeDistributionPath = "Assets/Data/BiomeDistribute/NormalBiomeDistribution.asset";
     private const string _terrainColorRangePath = "Assets/Data/GeneratorParameter/TerrainColorRange.asset";
     private const string _weatherColorRangePath = "Assets/Data/GeneratorParameter/WeatherColorRange.asset";
@@ -133,6 +138,7 @@ public class WorldMapEditor : EditorWindow
     private IWeatherGenerator _humidityGen = new WeatherGenerator();
     private IManaGenerator _manaGen = new ManaGenerator();
     private IRiverGenerator _riverGen = new RiverGenerator();
+    private IPopulationGenerator _populationGen = new PopulationGenerator();
 
     public void Init()
     {
@@ -141,6 +147,7 @@ public class WorldMapEditor : EditorWindow
         _paramTemperature = (TemperatureParameter)AssetDatabase.LoadAssetAtPath(_temperatureParamPath, typeof(TemperatureParameter));
         _paramMana = (ManaParameter)AssetDatabase.LoadAssetAtPath(_manaParamPath, typeof(ManaParameter));
         _paramRain = (RainParameter)AssetDatabase.LoadAssetAtPath(_rainParamPath, typeof(RainParameter));
+        _paramPopulation = (PopulationParameter)AssetDatabase.LoadAssetAtPath(_populationParamPath, typeof(PopulationParameter));
         _biomeDistribution = (BiomeDistribution)AssetDatabase.LoadAssetAtPath(_biomeDistributionPath, typeof(BiomeDistribution));
         _terrainColor = (ColorRangeDistribution)AssetDatabase.LoadAssetAtPath(_terrainColorRangePath, typeof(ColorRangeDistribution));
         _weatherColor = (ColorRangeDistribution)AssetDatabase.LoadAssetAtPath(_weatherColorRangePath, typeof(ColorRangeDistribution));
@@ -153,6 +160,7 @@ public class WorldMapEditor : EditorWindow
         _propertyParamTemperature = _serializedObj.FindProperty("_paramTemperature");
         _propertyParamMana = _serializedObj.FindProperty("_paramMana");
         _propertyParamRain = _serializedObj.FindProperty("_paramRain");
+        _propertyParamPopulation = _serializedObj.FindProperty("_paramPopulation");
         _propertyBiomeDistribution = _serializedObj.FindProperty("_biomeDistribution");
         _propertyTerrainColorRange = _serializedObj.FindProperty("_terrainColor");
         _propertyWeatherColorRange = _serializedObj.FindProperty("_weatherColor");
@@ -428,6 +436,15 @@ public class WorldMapEditor : EditorWindow
                 _noticeTxt = string.Format("River map: {0}*{1}", _tileData.Width, _tileData.Height);
             }
         }
+        if (GUILayout.Button("Population"))
+        {
+            _viewMapStatus = ViewMapStatus.Population;
+            if (_tileData != null)
+            {
+                _ShowTerrainMapPopulation(_tileData);
+                _noticeTxt = string.Format("Population map: {0}*{1}", _tileData.Width, _tileData.Height);
+            }
+        }
     }
 
     private void _DrawSubMenuBiome()
@@ -562,6 +579,7 @@ public class WorldMapEditor : EditorWindow
             EditorGUILayout.PropertyField(_propertyParamTemperature);
             EditorGUILayout.PropertyField(_propertyParamMana);
             EditorGUILayout.PropertyField(_propertyParamRain);
+            EditorGUILayout.PropertyField(_propertyParamPopulation);
             EditorGUILayout.PropertyField(_propertyBiomeDistribution);
             EditorGUILayout.PropertyField(_propertyTerrainColorRange);
             EditorGUILayout.PropertyField(_propertyWeatherColorRange);
@@ -688,9 +706,22 @@ public class WorldMapEditor : EditorWindow
             }
         }
 
+        var genPopulationMonad = new BlockMonad<int[]>(r =>
+            _populationGen.GeneratePopulationMap(
+                _width,
+                _height,
+                tileUnitMap,
+                identifier,
+                _paramPopulation,
+                r));
+        Debug.Log("start genPopulationMonad");
+        yield return genPopulationMonad.Do();
+        var populationMap = genPopulationMonad.Result;
+
         _tileData = new TileDataUnit
         {
             Map = tileUnitMap,
+            Populations = populationMap,
             Width = _width,
             Height = _height,
         };
@@ -707,7 +738,7 @@ public class WorldMapEditor : EditorWindow
         {
             for (int y = 0; y < mapData.Height; y++)
             {
-                var idx = MathUtility.MapIndex(x, y, _height);
+                var idx = MathUtility.MapIndex(x, y, mapData.Height);
                 var tileUnit = mapData.Map[idx];
                 var color = _GetColorOfTypeRange(tileUnit);
 
@@ -724,7 +755,7 @@ public class WorldMapEditor : EditorWindow
         {
             for (int y = 0; y < mapData.Height; y++)
             {
-                var idx = MathUtility.MapIndex(x, y, _height);
+                var idx = MathUtility.MapIndex(x, y, mapData.Height);
                 var tileUnit = mapData.Map[idx];
                 var color = _terrainColor.GetLerpColor(tileUnit.Height);
                 color.a = isValid(tileUnit) ? 1 : 0.2f;
@@ -732,6 +763,33 @@ public class WorldMapEditor : EditorWindow
             }
         }
         _worldTexture.Apply();
+    }
+
+    private void _ShowTerrainMapPopulation(TileDataUnit mapData)
+    {
+        _worldTexture = new Texture2D(mapData.Width, mapData.Height);
+        var count = 0;
+        for (int x = 0; x < mapData.Width; x++)
+        {
+            for (int y = 0; y < mapData.Height; y++)
+            {
+                var idx = MathUtility.MapIndex(x, y, mapData.Height);
+                var tileUnit = mapData.Map[idx];
+                var color = _terrainColor.GetLerpColor(tileUnit.Height);
+                if (mapData.Populations[idx] > 0)
+                {
+                    color = Color.black;
+                    count++;
+                }
+                else
+                {
+                    color.a = 0.05f;
+                }
+                _worldTexture.SetPixel(x, y, color);
+            }
+        }
+        _worldTexture.Apply();
+        _descriptionTxt = string.Format("num: {0}", count);
     }
     #endregion
 

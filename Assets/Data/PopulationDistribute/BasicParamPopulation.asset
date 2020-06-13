@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b648512b95f75c640b7ca520e0f0193c, type: 3}
+  m_Name: BasicParamPopulation
+  m_EditorClassIdentifier: 
+  HumidityVariety: 5
+  HeightVariety: 8
+  TemperatureVariety: 5
+  BasicProbability: 0.2
+  HumidityProbability:
+  - 0.1
+  - 0.4
+  - 0.8
+  - 0.7
+  - 0.6
+  HeightProbability:
+  - 0
+  - 0.1
+  - 0.5
+  - 0.9
+  - 0.7
+  - 0.5
+  - 0.2
+  - 0
+  TemperatureProbability:
+  - 0.5
+  - 0.65
+  - 0.8
+  - 0.5
+  - 0.3

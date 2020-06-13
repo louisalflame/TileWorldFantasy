@@ -8,8 +8,6 @@ public interface IPopulationGenerator
     IEnumerator GeneratePopulationMap(
            int width,
            int height,
-           float xOffset,
-           float yOffset,
            ITileUnit[] tileUnits,
            IBiomeIdentifier biomeIdentifier,
            PopulationParameter para,
@@ -17,8 +15,6 @@ public interface IPopulationGenerator
 }
 public class PopulationGenerator : IPopulationGenerator
 {
-    private float _xOffset;
-    private float _yOffset;
     private int _width;
     private int _height;
     private ITileUnit[] _tileUnits;
@@ -30,8 +26,6 @@ public class PopulationGenerator : IPopulationGenerator
     public IEnumerator GeneratePopulationMap(
            int width,
            int height,
-           float xOffset,
-           float yOffset,
            ITileUnit[] tileUnits,
            IBiomeIdentifier biomeIdentifier,
            PopulationParameter para,
@@ -39,15 +33,15 @@ public class PopulationGenerator : IPopulationGenerator
     {
         _width = width;
         _height = height;
-        _xOffset = xOffset;
-        _yOffset = yOffset;
+        _tileUnits = tileUnits;
+        _biomeIdentifier = biomeIdentifier;
         _para = para;
 
         _populationMap = new int[_width * _height];
 
-        yield return null;
+        yield return _GeneratePopulationMap();
 
-        
+        ret.Accept(_populationMap);
     }
 
     private IEnumerator _GeneratePopulationMap()
@@ -57,8 +51,24 @@ public class PopulationGenerator : IPopulationGenerator
             for (int y = 0; y < _height; y++)
             {
                 int idx = MathUtility.MapIndex(x, y, _height);
-                
-                
+                var tileUnit = _tileUnits[idx];
+
+                var heightIdx = Mathf.FloorToInt(tileUnit.Height * _para.HeightVariety);
+                var heightRand = Random.value;
+                if (heightRand > _para.HeightProbability[heightIdx]) continue;
+                var humidityIdx = Mathf.FloorToInt(tileUnit.Humidity * _para.HumidityVariety);
+                var humidityRand = Random.value;
+                if (humidityRand > _para.HumidityProbability[humidityIdx]) continue;
+                var temperIdx = Mathf.FloorToInt(tileUnit.Temperature * _para.TemperatureVariety);
+                var temperRand = Random.value;
+                if (temperRand > _para.TemperatureProbability[temperIdx]) continue;
+
+                if (Random.value < _para.BasicProbability)
+                {
+                    _populationMap[idx] = 1;
+                }
+                else
+                    _populationMap[idx] = 0;
             }
         }
         yield break; 

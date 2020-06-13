@@ -50,6 +50,7 @@ public static class SaveData  {
 public class TileDataUnit
 {
     public TileUnit[] Map;
+    public int[] Populations;
     public int Width;
     public int Height;
 }
