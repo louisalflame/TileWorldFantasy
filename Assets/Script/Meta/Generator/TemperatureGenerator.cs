@@ -43,6 +43,9 @@ public class TemperatureGenerator : ITemperatureGenerator
         TemperatureParameter para,
         IReturn<float[]> ret)
     {
+        GenerationValidation.CellCount(width, height);
+        if (para == null || para.WEATHER_GEN_PARA == null)
+            throw new System.ArgumentException("Assign temperature and weather parameters.");
         _width = width;
         _height = height;
         _para = para;

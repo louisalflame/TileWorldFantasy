@@ -45,6 +45,9 @@ public class RandomPointGenerator : IRandomPointGenerator
         int pointNum,
         RandomPointParameter para)
     {
+        GenerationValidation.CellCount(width, height);
+        GenerationValidation.RandomPoints(para);
+        if (pointNum < 0) throw new System.ArgumentOutOfRangeException("pointNum");
         _width = width;
         _height = height;
         _para = para;
@@ -58,6 +61,9 @@ public class RandomPointGenerator : IRandomPointGenerator
         RandomPointParameter para,
         IReturn<float[]> ret)
     {
+        GenerationValidation.CellCount(width, height);
+        GenerationValidation.RandomPoints(para);
+        if (para.NUM < 0) throw new System.ArgumentOutOfRangeException("para.NUM");
         _width = width;
         _height = height;
         _para = para;

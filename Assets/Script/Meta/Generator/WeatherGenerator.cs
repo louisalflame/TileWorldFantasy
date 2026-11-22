@@ -44,6 +44,9 @@ public class WeatherGenerator : IWeatherGenerator
         WeatherParameter para,
         IReturn<float[]> ret)
     { 
+        GenerationValidation.CellCount(width, height);
+        if (para == null) throw new System.ArgumentNullException("para");
+        GenerationValidation.Noise(para.FREQ_COUNT_TIMES, para.FREQ_GROW_FACTOR);
         _width = width;
         _height = height;
         _para = para;

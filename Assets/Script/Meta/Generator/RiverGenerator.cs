@@ -31,6 +31,12 @@ public class RiverGenerator : IRiverGenerator
         RainParameter para,
         IReturn<float[]> ret)
     {
+        var cellCount = GenerationValidation.CellCount(width, height);
+        GenerationValidation.Map(heightMap, cellCount, "heightMap");
+        GenerationValidation.Rain(para);
+        foreach (var value in heightMap)
+            GenerationValidation.UnitValue(value, "heightMap");
+
         _width = width;
         _height = height;
         _para = para;
@@ -38,7 +44,7 @@ public class RiverGenerator : IRiverGenerator
         var startLocations = heightMap
             .Select((h, idx) => new { h, idx })
             .OrderByDescending(i => i.h)
-            .Take(heightMap.Length / (int)(1 / _para.HEIGHT_LOCATIONS))
+            .Take(Mathf.FloorToInt(heightMap.Length * _para.HEIGHT_LOCATIONS))
             .Select(o => o.idx).ToArray();
 
         _directionMap = new int[heightMap.Length];
@@ -48,10 +54,15 @@ public class RiverGenerator : IRiverGenerator
 
         yield return _GenerateRainMap(startLocations, heightMap);
 
-        var rains = _rainMap.Where(i => i > 0);
-        var average = (rains.Sum() / rains.Count()) * _para.RIVER_AVERAGE_FACTOR;
+        var rains = _rainMap.Where(i => i > 0).ToArray();
+        if (rains.Length == 0)
+        {
+            ret.Accept(new float[cellCount]);
+            yield break;
+        }
+        var average = rains.Average(i => (double)i) * _para.RIVER_AVERAGE_FACTOR;
 
-        var rainResult = _rainMap.Select(i => Mathf.Min(i / average, 1)).ToArray(); 
+        var rainResult = _rainMap.Select(i => Mathf.Clamp01((float)(i / average))).ToArray();
         ret.Accept(rainResult); 
     }
 
@@ -153,6 +164,6 @@ public class RiverGenerator : IRiverGenerator
 
     private int _GetIndex(int x, int y)
     {
-        return y * _width + x;
+        return MathUtility.MapIndex(x, y, _height);
     }
 }

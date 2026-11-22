@@ -72,44 +72,36 @@ public class BiomeDistributionEditor : Editor
         EditorGUILayout.PropertyField(_heightVariety);
         EditorGUILayout.PropertyField(_temperatureVariety);
 
-        if (EditorGUI.EndChangeCheck())
-        {
-            _UpdateRange(_humidityVariety.intValue, _heightVariety.intValue, _temperatureVariety.intValue);
-            _UpdateBiomeVariety(_humidityVariety.intValue, _heightVariety.intValue, _temperatureVariety.intValue);
-        }
+        EditorGUI.EndChangeCheck();
+        _humidityVariety.intValue = Mathf.Max(1, _humidityVariety.intValue);
+        _heightVariety.intValue = Mathf.Max(1, _heightVariety.intValue);
+        _temperatureVariety.intValue = Mathf.Max(1, _temperatureVariety.intValue);
+        _UpdateRange(_humidityVariety.intValue, _heightVariety.intValue, _temperatureVariety.intValue);
+        _UpdateBiomeVariety(_humidityVariety.intValue, _heightVariety.intValue, _temperatureVariety.intValue);
     }
 
     private void _UpdateRange(int humiditys, int heights, int temperatures)
     {
-        _humidityRange.ClearArray();
-        for (int i = 0; i < humiditys; i++)
-            _humidityRange.InsertArrayElementAtIndex(i);
-        _heightRange.ClearArray();
-        for (int i = 0; i < heights; i++)
-            _heightRange.InsertArrayElementAtIndex(i);
-        _temperatureRange.ClearArray();
-        for (int i = 0; i < temperatures; i++)
-            _temperatureRange.InsertArrayElementAtIndex(i);
+        EditorArrayUtility.Resize(_humidityRange, humiditys, p => p.intValue = 1);
+        EditorArrayUtility.Resize(_heightRange, heights, p => p.intValue = 1);
+        EditorArrayUtility.Resize(_temperatureRange, temperatures, p => p.intValue = 1);
     }
 
     private void _UpdateBiomeVariety(int humiditys, int heights, int temperatures)
     {
-        _biomeHumiditys.ClearArray();
+        EditorArrayUtility.Resize(_biomeHumiditys, humiditys,
+            p => p.FindPropertyRelative("BiomeHeights").arraySize = 0);
 
         for (int i = 0; i < humiditys; i++)
         {
-            _biomeHumiditys.InsertArrayElementAtIndex(i);
             SerializedProperty biomeheights = _GetBiomeheightsAt(_biomeHumiditys, i);
+            EditorArrayUtility.Resize(biomeheights, heights,
+                p => p.FindPropertyRelative("BiomeTemperatures").arraySize = 0);
 
-            for (int j = 0; j < temperatures; j++)
+            for (int j = 0; j < heights; j++)
             {
-                biomeheights.InsertArrayElementAtIndex(j);
                 SerializedProperty biomeTemperatures = _GetBiomeTemperaturesAt(biomeheights, j);
-
-                for (int k = 0; k < heights; k++)
-                {
-                    biomeTemperatures.InsertArrayElementAtIndex(k);
-                }
+                EditorArrayUtility.Resize(biomeTemperatures, temperatures, p => p.objectReferenceValue = null);
             }
         } 
     }
@@ -172,12 +164,12 @@ public class BiomeDistributionEditor : Editor
         {
             SerializedProperty biomeheights = _GetBiomeheightsAt(_biomeHumiditys, i);
             
-            for (int j = 0; j < _temperatureVariety.intValue; j++)
+            for (int j = 0; j < _heightVariety.intValue; j++)
             {
                 SerializedProperty biomeTemperatures = _GetBiomeTemperaturesAt(biomeheights, j);
                 cellPosition.x = startLineX; // Get back to the beginning of the line
 
-                for (int k = 0; k < _heightVariety.intValue; k++)
+                for (int k = 0; k < _temperatureVariety.intValue; k++)
                 {
                     SerializedProperty biome = _GetBiomeAt(biomeTemperatures, k);
                     EditorGUI.PropertyField(cellPosition, biome, GUIContent.none);

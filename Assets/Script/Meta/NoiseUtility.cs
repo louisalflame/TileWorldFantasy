@@ -11,6 +11,7 @@ public static class NoiseUtility
         int freqCountTimes,
         int freqGrowFactor)
     {
+        GenerationValidation.Noise(freqCountTimes, freqGrowFactor);
         float sample = 0f;
         float freq = 1f;
         float sampleTimes = 0f;

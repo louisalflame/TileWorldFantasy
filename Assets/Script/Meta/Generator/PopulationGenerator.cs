@@ -31,6 +31,16 @@ public class PopulationGenerator : IPopulationGenerator
            PopulationParameter para,
            IReturn<int[]> ret)
     {
+        var cellCount = GenerationValidation.CellCount(width, height);
+        GenerationValidation.Map(tileUnits, cellCount, "tileUnits");
+        GenerationValidation.Population(para);
+        foreach (var tile in tileUnits)
+        {
+            if (tile == null) throw new System.ArgumentException("Tiles must not be null.", "tileUnits");
+            GenerationValidation.UnitValue(tile.Height, "tile height");
+            GenerationValidation.UnitValue(tile.Humidity, "tile humidity");
+            GenerationValidation.UnitValue(tile.Temperature, "tile temperature");
+        }
         _width = width;
         _height = height;
         _tileUnits = tileUnits;
@@ -53,17 +63,14 @@ public class PopulationGenerator : IPopulationGenerator
                 int idx = MathUtility.MapIndex(x, y, _height);
                 var tileUnit = _tileUnits[idx];
 
-                var heightIdx = Mathf.FloorToInt(tileUnit.Height * _para.HeightVariety);
-                var heightRand = Random.value;
-                if (heightRand > _para.HeightProbability[heightIdx]) continue;
-                var humidityIdx = Mathf.FloorToInt(tileUnit.Humidity * _para.HumidityVariety);
-                var humidityRand = Random.value;
-                if (humidityRand > _para.HumidityProbability[humidityIdx]) continue;
-                var temperIdx = Mathf.FloorToInt(tileUnit.Temperature * _para.TemperatureVariety);
-                var temperRand = Random.value;
-                if (temperRand > _para.TemperatureProbability[temperIdx]) continue;
+                var heightIdx = Mathf.Min(Mathf.FloorToInt(tileUnit.Height * _para.HeightVariety), _para.HeightVariety - 1);
+                if (!_PassChance(_para.HeightProbability[heightIdx])) continue;
+                var humidityIdx = Mathf.Min(Mathf.FloorToInt(tileUnit.Humidity * _para.HumidityVariety), _para.HumidityVariety - 1);
+                if (!_PassChance(_para.HumidityProbability[humidityIdx])) continue;
+                var temperIdx = Mathf.Min(Mathf.FloorToInt(tileUnit.Temperature * _para.TemperatureVariety), _para.TemperatureVariety - 1);
+                if (!_PassChance(_para.TemperatureProbability[temperIdx])) continue;
 
-                if (Random.value < _para.BasicProbability)
+                if (_PassChance(_para.BasicProbability))
                 {
                     _populationMap[idx] = 1;
                 }
@@ -72,5 +79,10 @@ public class PopulationGenerator : IPopulationGenerator
             }
         }
         yield break; 
+    }
+
+    private static bool _PassChance(float probability)
+    {
+        return probability >= 1f || (probability > 0f && Random.value < probability);
     }
 }

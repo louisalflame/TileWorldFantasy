@@ -69,23 +69,18 @@ public class PopulationParameterEditor : Editor
         EditorGUILayout.PropertyField(_heightVariety);
         EditorGUILayout.PropertyField(_temperatureVariety);
 
-        if (EditorGUI.EndChangeCheck())
-        {
-            _UpdateRange(_humidityVariety.intValue, _heightVariety.intValue, _temperatureVariety.intValue);
-        }
+        EditorGUI.EndChangeCheck();
+        _humidityVariety.intValue = Mathf.Max(1, _humidityVariety.intValue);
+        _heightVariety.intValue = Mathf.Max(1, _heightVariety.intValue);
+        _temperatureVariety.intValue = Mathf.Max(1, _temperatureVariety.intValue);
+        _UpdateRange(_humidityVariety.intValue, _heightVariety.intValue, _temperatureVariety.intValue);
     }
 
     private void _UpdateRange(int humiditys, int heights, int temperatures)
     {
-        _humidityProbability.ClearArray();
-        for (int i = 0; i < humiditys; i++)
-            _humidityProbability.InsertArrayElementAtIndex(i);
-        _heightProbability.ClearArray();
-        for (int i = 0; i < heights; i++)
-            _heightProbability.InsertArrayElementAtIndex(i);
-        _temperatureProbability.ClearArray();
-        for (int i = 0; i < temperatures; i++)
-            _temperatureProbability.InsertArrayElementAtIndex(i);
+        EditorArrayUtility.Resize(_humidityProbability, humiditys, p => p.floatValue = 0f);
+        EditorArrayUtility.Resize(_heightProbability, heights, p => p.floatValue = 0f);
+        EditorArrayUtility.Resize(_temperatureProbability, temperatures, p => p.floatValue = 0f);
     }
     private Rect _DisplayRangeGrid(Rect startRect)
     {

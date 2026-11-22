@@ -37,7 +37,16 @@ public class WorldMapEditor : EditorWindow
 
     void Update()
     {
-        _executor.Resume(Time.deltaTime);
+        try
+        {
+            _executor.Resume(Time.deltaTime);
+        }
+        catch (System.Exception e)
+        {
+            _executor.Clear();
+            _noticeTxt = "World generation failed: " + e.Message;
+            Debug.LogException(e);
+        }
     }
     #endregion
 
@@ -356,8 +365,10 @@ public class WorldMapEditor : EditorWindow
             _newMapStatus = NewMapStatus.Save;
             if (_tileData != null)
             {
-                SaveData.SaveMap(_tileData);
-                _noticeTxt = "Map saved success";
+                string error;
+                _noticeTxt = SaveData.SaveMap(_tileData, out error)
+                    ? "Map saved successfully."
+                    : "Map save failed: " + error;
             }
             else
             {
@@ -367,14 +378,17 @@ public class WorldMapEditor : EditorWindow
         if (GUILayout.Button("Load"))
         {
             _newMapStatus = NewMapStatus.Load;
-            _tileData = SaveData.LoadMap();
-            if (_tileData != null)
+            string message;
+            var loaded = SaveData.LoadMap(out message);
+            if (loaded != null)
             {
-                _noticeTxt = "Map loaded success";
+                _tileData = loaded;
+                _worldTexture = null;
+                _noticeTxt = "Map loaded successfully. " + message;
             }
             else
             {
-                _noticeTxt = "Error! No map to saved";
+                _noticeTxt = "Map load failed: " + message;
             }
         }
 
@@ -601,12 +615,25 @@ public class WorldMapEditor : EditorWindow
 
     private bool _CheckPreparedToCreate()
     {
-        if (_paramTerrain == null ||
-            _paramWeather == null ||
-            _biomeDistribution == null ||
-            _width == 0 || _height == 0 )
+        try
         {
-            _noticeTxt = "Parameter is null !";
+            GenerationValidation.CellCount(_width, _height);
+            if (_paramTerrain == null || _paramWeather == null || _paramTemperature == null ||
+                _paramTemperature.WEATHER_GEN_PARA == null)
+                throw new System.ArgumentException("Assign terrain, humidity and temperature parameters.");
+            GenerationValidation.RandomPoints(_paramTerrain.RANDOM_POINT_GEN_PARA);
+            GenerationValidation.Noise(_paramTerrain.FREQ_COUNT_TIMES, _paramTerrain.FREQ_GROW_FACTOR);
+            GenerationValidation.Noise(_paramWeather.FREQ_COUNT_TIMES, _paramWeather.FREQ_GROW_FACTOR);
+            GenerationValidation.Noise(_paramTemperature.WEATHER_GEN_PARA.FREQ_COUNT_TIMES,
+                _paramTemperature.WEATHER_GEN_PARA.FREQ_GROW_FACTOR);
+            GenerationValidation.Mana(_paramMana);
+            GenerationValidation.Rain(_paramRain);
+            GenerationValidation.Population(_paramPopulation);
+            new BasicBiomeIdentifier(_biomeDistribution);
+        }
+        catch (System.ArgumentException e)
+        {
+            _noticeTxt = "Invalid world parameters: " + e.Message;
             return false;
         }
         _noticeTxt = "Start create world ...";

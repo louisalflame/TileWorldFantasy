@@ -42,6 +42,10 @@ public class TerrainGenerator : ITerrainGenerator
         TerrainParameter para,
         IReturn<float[]> ret)
     {
+        GenerationValidation.CellCount(width, height);
+        if (para == null) throw new System.ArgumentNullException("para");
+        GenerationValidation.Noise(para.FREQ_COUNT_TIMES, para.FREQ_GROW_FACTOR);
+        GenerationValidation.RandomPoints(para.RANDOM_POINT_GEN_PARA);
         _width = width;
         _height = height;
         _xOffset = xOffset;

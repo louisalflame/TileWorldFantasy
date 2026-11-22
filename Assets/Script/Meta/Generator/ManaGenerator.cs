@@ -38,6 +38,8 @@ public class ManaGenerator : IManaGenerator
         ManaParameter para,
         IReturn<float[]> ret)
     {
+        GenerationValidation.CellCount(width, height);
+        GenerationValidation.Mana(para);
         _width = width;
         _height = height;
         _para = para;
@@ -64,8 +66,8 @@ public class ManaGenerator : IManaGenerator
 
         _highPosPoints = points.Take(_para.POSITIVE_HIGH_POINTS_NUM).ToList();
         points = points.Skip(_para.POSITIVE_HIGH_POINTS_NUM).ToList();
-        _midPosPoints = points.Take(_para.POSITIVE_HIGH_POINTS_NUM).ToList();
-        points = points.Skip(_para.POSITIVE_HIGH_POINTS_NUM).ToList();
+        _midPosPoints = points.Take(_para.POSITIVE_MID_POINTS_NUM).ToList();
+        points = points.Skip(_para.POSITIVE_MID_POINTS_NUM).ToList();
         _lowPosPoints = points.Take(_para.POSITIVE_LOW_POINTS_NUM).ToList();
         points = points.Skip(_para.POSITIVE_LOW_POINTS_NUM).ToList();
         _highNegPoints = points.Take(_para.NEGATIVE_HIGH_POINTS_NUM).ToList();
@@ -85,7 +87,7 @@ public class ManaGenerator : IManaGenerator
         {
             for (int y = 0; y < _height; y++)
             {
-                var idx = y * _width + x;
+                var idx = MathUtility.MapIndex(x, y, _height);
                 _manaMap[idx] = _localAreaMap[idx] + 0.5f;
             }
         }
