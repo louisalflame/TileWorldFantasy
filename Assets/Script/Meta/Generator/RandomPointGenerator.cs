@@ -79,6 +79,8 @@ public class RandomPointGenerator : IRandomPointGenerator
 
     private IEnumerator _GenerateRandomLocalAreaMap()
     {
+        var noise = new NoiseUtility.PreparedFractal(_para.LOCAL_SCALE,
+            _para.LOCAL_FREQ_COUNT_TIMES, _para.LOCAL_FREQ_GROW_FACTOR, 1f / _para.LOCAL_FREQ_GROW_FACTOR);
         for (int x = 0; x < _width; x++)
         {
             for (int y = 0; y < _height; y++)
@@ -89,6 +91,8 @@ public class RandomPointGenerator : IRandomPointGenerator
                 var coord = new Vector2(xCoord, yCoord);
 
                 float sample = 0;
+                float upNoise = 0f;
+                bool sampled = false;
 
                 for (int i = 0; i < _points.Count; i++)
                 {
@@ -99,14 +103,11 @@ public class RandomPointGenerator : IRandomPointGenerator
                     float upDegree = _para.LOCAL_AREA_RADIUS - distance;
                     float upHeight = _para.LOCAL_AREA_SCALE * upDegree; 
 
-                    float upNoise = NoiseUtility.CountRecursivePerlinNoise(
-                        xCoord,
-                        yCoord,
-                        _para.LOCAL_XOFFSET,
-                        _para.LOCAL_YOFFSET,
-                        _para.LOCAL_SCALE, 
-                        _para.LOCAL_FREQ_COUNT_TIMES, 
-                        _para.LOCAL_FREQ_GROW_FACTOR);
+                    if (!sampled)
+                    {
+                        upNoise = noise.Sample(xCoord, yCoord, _para.LOCAL_XOFFSET, _para.LOCAL_YOFFSET);
+                        sampled = true;
+                    }
 
                     sample += upNoise * upHeight;
                 }

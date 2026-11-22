@@ -35,6 +35,67 @@ public static class GenerationValidation
             throw new ArgumentException("Noise octave count and frequency growth must be positive.");
     }
 
+    public static void Terrain(TerrainParameter parameter)
+    {
+        if (parameter == null) throw new ArgumentNullException("parameter");
+        Positive(parameter.WORLD_SCALE, "世界基準尺度");
+        if (parameter.USE_LAYERED_TERRAIN)
+        {
+            TerrainLayer(parameter.CONTINENTS);
+            TerrainLayer(parameter.MOUNTAIN_REGIONS);
+            TerrainLayer(parameter.RIDGES);
+            TerrainLayer(parameter.DETAILS);
+            UnitValue(parameter.LAND_THRESHOLD, "海陸門檻");
+            UnitValue(parameter.CONTINENT_RELIEF, "大陸高度幅度");
+            UnitValue(parameter.BASE_LAND_HEIGHT, "基準陸地高度");
+            UnitValue(parameter.MOUNTAIN_THRESHOLD, "山區門檻");
+            UnitValue(parameter.MOUNTAIN_HEIGHT, "山脈高度");
+            UnitValue(parameter.PLAIN_DETAIL_HEIGHT, "平原細節幅度");
+            UnitValue(parameter.MOUNTAIN_DETAIL_HEIGHT, "山區細節幅度");
+            Positive(parameter.LAND_BLEND_HEIGHT, "海岸緩衝高度");
+            Positive(parameter.MOUNTAIN_BLEND, "山區過渡範圍");
+            Positive(parameter.RIDGE_SHARPNESS, "山稜尖銳程度");
+        }
+        else
+        {
+            Noise(parameter.FREQ_COUNT_TIMES, parameter.FREQ_GROW_FACTOR);
+            RandomPoints(parameter.RANDOM_POINT_GEN_PARA);
+            Positive(parameter.SCALE, "舊版地形頻率");
+            Positive(parameter.LOW_GROUND_FACTOR, "舊版低地次方");
+            Positive(parameter.HIGH_MOUNTAIN_FACTOR, "舊版高地次方");
+        }
+        UnitValue(parameter.SEA_LEVEL, "海平面");
+        UnitValue(parameter.OCEAN_FLOOR_HEIGHT, "海底高度");
+        if (parameter.OCEAN_FLOOR_HEIGHT >= parameter.SEA_LEVEL)
+            throw new ArgumentException("海底高度必須嚴格低於海平面。");
+        Finite(parameter.COAST_TRANSITION_WIDTH, "coast transition width");
+        Finite(parameter.COAST_NOISE_AMPLITUDE, "coast noise amplitude");
+        Finite(parameter.COAST_NOISE_SCALE, "coast noise scale");
+        Finite(parameter.COAST_TRANSITION_WIDTH + parameter.COAST_NOISE_AMPLITUDE, "maximum coast width");
+        if (parameter.OCEAN_BORDER_WIDTH < 1 || parameter.COAST_TRANSITION_WIDTH <= 0f ||
+            parameter.COAST_NOISE_AMPLITUDE < 0f || parameter.COAST_NOISE_SCALE <= 0f)
+            throw new ArgumentException("外海帶基準寬度至少為 1；過渡寬度與噪聲波長必須大於零，噪聲幅度不可為負數。");
+    }
+
+    private static void Positive(float value, string name)
+    {
+        Finite(value, name);
+        if (value <= 0f) throw new ArgumentException(name + "必須大於零。");
+    }
+
+    public static void TerrainLayer(TerrainNoiseLayer layer)
+    {
+        if (layer == null) throw new ArgumentException("地形噪聲層不可為空。");
+        if (!layer.ENABLED) return;
+        Positive(layer.WAVELENGTH, "噪聲波長");
+        Finite(1f / layer.WAVELENGTH, "噪聲頻率");
+        UnitValue(layer.PERSISTENCE, "噪聲振幅保留比例");
+        Finite(layer.LACUNARITY, "噪聲頻率倍數");
+        if (layer.OCTAVES < 1 || layer.OCTAVES > 12 || layer.LACUNARITY < 1f || layer.LACUNARITY > 4f)
+            throw new ArgumentException("地形噪聲層數必須為 1～12，頻率倍數必須為 1～4。");
+        Finite(Mathf.Pow(layer.LACUNARITY, layer.OCTAVES - 1) / layer.WAVELENGTH, "最高噪聲頻率");
+    }
+
     public static void Rain(RainParameter parameter)
     {
         if (parameter == null) throw new ArgumentNullException("parameter");

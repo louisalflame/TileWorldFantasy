@@ -2,6 +2,41 @@
 
 public static class NoiseUtility
 {
+    // Prepared once per generation; no parameter validation or weight setup per cell.
+    public sealed class PreparedFractal
+    {
+        private readonly float[] _frequencies;
+        private readonly float[] _weights;
+        private readonly float _weightSum;
+
+        public PreparedFractal(float scale, int octaves, float lacunarity, float persistence)
+        {
+            _frequencies = new float[octaves];
+            _weights = new float[octaves];
+            float frequency = scale, weight = 1f;
+            for (int i = 0; i < octaves; i++)
+            {
+                _frequencies[i] = frequency;
+                _weights[i] = weight;
+                _weightSum += weight;
+                frequency *= lacunarity;
+                weight *= persistence;
+            }
+        }
+
+        public float Sample(float x, float y, float xOffset, float yOffset, bool ridged = false)
+        {
+            float result = 0f;
+            for (int i = 0; i < _frequencies.Length; i++)
+            {
+                float value = Mathf.PerlinNoise(x * _frequencies[i] + xOffset, y * _frequencies[i] + yOffset);
+                if (ridged) value = 1f - Mathf.Abs(2f * value - 1f);
+                result += value * _weights[i];
+            }
+            return Mathf.Clamp01(result / _weightSum);
+        }
+    }
+
     public static float CountRecursivePerlinNoise(
         float xCoord,
         float yCoord,
@@ -28,7 +63,10 @@ public static class NoiseUtility
         }
         sample /= sampleTimes;
 
-        return sample;
+        // Unity PerlinNoise can slightly exceed [0, 1], including after octave averaging.
+        // Keep the normalized-noise contract here, before humidity reaches biome lookup.
+        // Clamp01 does not turn NaN into a valid sample; downstream validation still rejects it.
+        return Mathf.Clamp01(sample);
     }
 }
 

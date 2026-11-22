@@ -21,6 +21,7 @@ public class WorldMapEditor : EditorWindow
     void OnDestroy()
     {
         _executor.Clear();
+        _ReleasePreviewTexture();
     }
 
     void OnGUI()
@@ -138,6 +139,10 @@ public class WorldMapEditor : EditorWindow
     private string _noticeTxt;
     private string _descriptionTxt = string.Empty;
     private Texture2D _worldTexture = null;
+    [SerializeField] private float _previewZoom = 1f;
+    [SerializeField] private bool _previewFit = true;
+    [SerializeField] private bool _previewPointFilter = true;
+    private Vector2 _previewScroll;
     private TileDataUnit _tileData = null;
     private Executor _executor = new Executor();
 
@@ -180,7 +185,7 @@ public class WorldMapEditor : EditorWindow
         _propertySeed = _serializedObj.FindProperty("_seed");
 
         _noticeTxt = string.Empty;
-        _worldTexture = null;
+        _ReleasePreviewTexture();
         _tileData = null;
         _executor.Clear();
     }
@@ -190,7 +195,6 @@ public class WorldMapEditor : EditorWindow
     private bool _isEditorCompiling = false;
     private bool _isPlaying = false;
     private bool _initialGUI = false;
-    private GUIStyle _mapStyle;
     private GUIStyle _menuStyle;
     private GUIStyle _subMenuStyle;
     private void _OnGUI()
@@ -277,10 +281,6 @@ public class WorldMapEditor : EditorWindow
         {
             fixedWidth = 160
         };
-        _mapStyle = new GUIStyle
-        {
-            fixedHeight = 200,
-        };
     }
 
     private void _DrawHeader()
@@ -294,7 +294,7 @@ public class WorldMapEditor : EditorWindow
         if (GUILayout.Button("View Map", GUILayout.Width(200)))
         {
             _mainMenuStatus = MainMenuStatus.ViewMap;
-            _worldTexture = null;
+            _ReleasePreviewTexture();
             _noticeTxt = string.Empty;
         }
     }
@@ -383,7 +383,8 @@ public class WorldMapEditor : EditorWindow
             if (loaded != null)
             {
                 _tileData = loaded;
-                _worldTexture = null;
+                _ReleasePreviewTexture();
+                _previewScroll = Vector2.zero;
                 _noticeTxt = "Map loaded successfully. " + message;
             }
             else
@@ -561,30 +562,75 @@ public class WorldMapEditor : EditorWindow
 
     private void _DrawMainViewMap()
     {
-        EditorGUILayout.BeginHorizontal();
+        EditorGUILayout.LabelField(_noticeTxt, EditorStyles.wordWrappedLabel);
+        if (_worldTexture == null)
         {
-            EditorGUILayout.BeginVertical(_mapStyle);
-            {
-                if (_worldTexture != null)
-                {
-                    EditorGUILayout.LabelField(_noticeTxt);
-                    var rect = GUILayoutUtility.GetLastRect();
-                    GUI.DrawTexture(new Rect(rect.min.x, rect.min.y + rect.height + 10, 200, 200), _worldTexture, ScaleMode.ScaleToFit);
-                }
-            }
-            EditorGUILayout.EndVertical();
+            EditorGUILayout.HelpBox("請先生成或讀取地圖，再選擇左側的預覽類型。", MessageType.Info);
+            return;
+        }
 
-            EditorGUILayout.BeginVertical(_subMenuStyle);
-            EditorGUILayout.LabelField(_descriptionTxt);
-            EditorGUILayout.EndVertical();
+        EditorGUI.BeginChangeCheck();
+        float zoomPercent = EditorGUILayout.Slider(new GUIContent("縮放（%）", "只改變顯示大小，不會重新生成地圖。"),
+            _previewZoom * 100f, 1f, 1600f);
+        if (EditorGUI.EndChangeCheck()) _SetPreviewZoom(zoomPercent / 100f);
+
+        // Width and height are linked so rectangular maps retain their aspect ratio.
+        EditorGUI.BeginChangeCheck();
+        int displayWidth = EditorGUILayout.DelayedIntField(new GUIContent("顯示寬度", "輸入顯示寬度並按 Enter；高度會依地圖比例連動。單位為 Editor 顯示點。"),
+            Mathf.RoundToInt(_worldTexture.width * _previewZoom));
+        if (EditorGUI.EndChangeCheck()) _SetPreviewZoom((float)displayWidth / _worldTexture.width);
+        EditorGUI.BeginChangeCheck();
+        int displayHeight = EditorGUILayout.DelayedIntField(new GUIContent("顯示高度", "輸入顯示高度並按 Enter；寬度會依地圖比例連動，不影響生成解析度。"),
+            Mathf.RoundToInt(_worldTexture.height * _previewZoom));
+        if (EditorGUI.EndChangeCheck()) _SetPreviewZoom((float)displayHeight / _worldTexture.height);
+
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button(new GUIContent("符合視窗", "隨可用預覽區域調整大小，顯示完整地圖。")))
+        {
+            _previewFit = true;
+            _previewScroll = Vector2.zero;
+        }
+        if (GUILayout.Button(new GUIContent("1:1", "每個地圖格子以一個顯示點呈現。")))
+        {
+            _SetPreviewZoom(1f);
+            _previewScroll = Vector2.zero;
         }
         EditorGUILayout.EndHorizontal();
+        _previewPointFilter = EditorGUILayout.Toggle(new GUIContent("清晰格子", "開啟時放大顯示清楚的格子邊界；關閉時使用平滑插值。"), _previewPointFilter);
+        if (!string.IsNullOrEmpty(_descriptionTxt))
+            EditorGUILayout.LabelField(_descriptionTxt, EditorStyles.wordWrappedLabel);
+
+        Rect viewport = GUILayoutUtility.GetRect(80f, 100000f, 80f, 100000f,
+            GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+        // Reserve room for both scrollbars, so fit mode never oscillates as they appear.
+        Vector2 available = new Vector2(Mathf.Max(1f, viewport.width - 18f), Mathf.Max(1f, viewport.height - 18f));
+        if (_previewFit)
+            _previewZoom = Mathf.Clamp(Mathf.Min(available.x / _worldTexture.width, available.y / _worldTexture.height), 0.01f, 16f);
+        Vector2 size = new Vector2(_worldTexture.width, _worldTexture.height) * _previewZoom;
+        Rect content = new Rect(0f, 0f, Mathf.Max(size.x, available.x), Mathf.Max(size.y, available.y));
+        GUI.Box(viewport, GUIContent.none);
+        _previewScroll = GUI.BeginScrollView(viewport, _previewScroll, content, true, true);
+        try
+        {
+            _worldTexture.filterMode = _previewPointFilter ? FilterMode.Point : FilterMode.Bilinear;
+            var image = new Rect(Mathf.Max(0f, (content.width - size.x) / 2f), Mathf.Max(0f, (content.height - size.y) / 2f), size.x, size.y);
+            GUI.DrawTexture(image, _worldTexture, ScaleMode.StretchToFill);
+        }
+        finally { GUI.EndScrollView(); }
+    }
+
+    private void _SetPreviewZoom(float zoom)
+    {
+        _previewZoom = float.IsNaN(zoom) || float.IsInfinity(zoom) ? 1f : Mathf.Clamp(zoom, 0.01f, 16f);
+        _previewFit = false;
     }
     #endregion
 
     #region CreateWorld
+    private Vector2 _parameterScroll;
     private void _EditParameter()
     {
+        _parameterScroll = EditorGUILayout.BeginScrollView(_parameterScroll);
         try
         {
             EditorGUI.BeginChangeCheck();
@@ -606,11 +652,45 @@ public class WorldMapEditor : EditorWindow
             {
                 _serializedObj.ApplyModifiedProperties();
             }
+            _DrawCoastParameters();
         }
         catch(System.Exception e)
         {
             Debug.LogError(e);
         }
+        finally { EditorGUILayout.EndScrollView(); }
+    }
+
+    private bool _showCoastParameters = true;
+
+    private void _DrawCoastParameters()
+    {
+        if (_paramTerrain == null) return;
+        _showCoastParameters = EditorGUILayout.Foldout(_showCoastParameters, "地形分層與外海設定", true);
+        if (!_showCoastParameters) return;
+        EditorGUILayout.HelpBox("以下欄位會編輯目前指定的地形參數資產，支援復原。分層波長與海岸寬度除以 WORLD SCALE 就是地圖比例；" +
+            "只改地圖長寬可提高同一世界的解析度。" +
+            "生態高度分段、預覽色階與河流終點仍需另行設定。將滑鼠停在欄位標籤上可查看中文說明。", MessageType.Info);
+        using (var settings = new SerializedObject(_paramTerrain))
+        {
+            settings.Update();
+            var field = settings.GetIterator();
+            bool enterChildren = true;
+            while (field.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                if (field.name == "m_Script") continue;
+                EditorGUILayout.PropertyField(field, true);
+            }
+            settings.ApplyModifiedProperties();
+        }
+        try { GenerationValidation.Terrain(_paramTerrain); }
+        catch (System.ArgumentException e) { EditorGUILayout.HelpBox(e.Message, MessageType.Error); }
+        float interiorStart = _paramTerrain.OCEAN_BORDER_WIDTH +
+            _paramTerrain.COAST_TRANSITION_WIDTH + _paramTerrain.COAST_NOISE_AMPLITUDE;
+        if (_paramTerrain.WORLD_SCALE / 2f < interiorStart)
+            EditorGUILayout.HelpBox("外海與過渡比例過大，可能無法保留不受海岸影響的內陸，甚至全部為海洋。" +
+                "請減少寬度比例；提高輸出解析度不會改變這個比例。", MessageType.Warning);
     }
 
     private bool _CheckPreparedToCreate()
@@ -621,8 +701,7 @@ public class WorldMapEditor : EditorWindow
             if (_paramTerrain == null || _paramWeather == null || _paramTemperature == null ||
                 _paramTemperature.WEATHER_GEN_PARA == null)
                 throw new System.ArgumentException("Assign terrain, humidity and temperature parameters.");
-            GenerationValidation.RandomPoints(_paramTerrain.RANDOM_POINT_GEN_PARA);
-            GenerationValidation.Noise(_paramTerrain.FREQ_COUNT_TIMES, _paramTerrain.FREQ_GROW_FACTOR);
+            GenerationValidation.Terrain(_paramTerrain);
             GenerationValidation.Noise(_paramWeather.FREQ_COUNT_TIMES, _paramWeather.FREQ_GROW_FACTOR);
             GenerationValidation.Noise(_paramTemperature.WEATHER_GEN_PARA.FREQ_COUNT_TIMES,
                 _paramTemperature.WEATHER_GEN_PARA.FREQ_GROW_FACTOR);
@@ -757,10 +836,22 @@ public class WorldMapEditor : EditorWindow
     #endregion
 
     #region ViewMapTexture
+    private void _ReleasePreviewTexture()
+    {
+        if (_worldTexture != null) DestroyImmediate(_worldTexture);
+        _worldTexture = null;
+    }
+
+    private void _CreatePreviewTexture(int width, int height)
+    {
+        _ReleasePreviewTexture();
+        _worldTexture = new Texture2D(width, height) { wrapMode = TextureWrapMode.Clamp };
+    }
+
     private void _ShowWorldMapTexture(TileDataUnit mapData)
     {
         _noticeTxt = string.Format("Load Map  - {0}*{1}", mapData.Width, mapData.Height);
-        _worldTexture = new Texture2D(mapData.Width, mapData.Height);
+        _CreatePreviewTexture(mapData.Width, mapData.Height);
         for (int x = 0; x < mapData.Width; x++)
         {
             for (int y = 0; y < mapData.Height; y++)
@@ -777,7 +868,7 @@ public class WorldMapEditor : EditorWindow
 
     private void _ShowTerrainMapCondition(TileDataUnit mapData, System.Func<TileUnit, bool> isValid)
     {
-        _worldTexture = new Texture2D(mapData.Width, mapData.Height);
+        _CreatePreviewTexture(mapData.Width, mapData.Height);
         for (int x = 0; x < mapData.Width; x++)
         {
             for (int y = 0; y < mapData.Height; y++)
@@ -794,7 +885,7 @@ public class WorldMapEditor : EditorWindow
 
     private void _ShowTerrainMapPopulation(TileDataUnit mapData)
     {
-        _worldTexture = new Texture2D(mapData.Width, mapData.Height);
+        _CreatePreviewTexture(mapData.Width, mapData.Height);
         var count = 0;
         for (int x = 0; x < mapData.Width; x++)
         {
