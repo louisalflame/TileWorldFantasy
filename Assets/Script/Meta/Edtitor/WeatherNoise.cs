@@ -1,9 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
 using Utility;
 
@@ -95,28 +92,3 @@ public class WeatherNoise : MonoBehaviour
         }
     }
 }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(WeatherNoise))]
-public class WeatherNoiseEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-
-        WeatherNoise myWeatherNoise = (WeatherNoise)target;
-        if (GUILayout.Button("DrawTexture"))
-        {
-            myWeatherNoise.DrawTexture();
-        }
-        if (GUILayout.Button("StartWeatherChange"))
-        {
-            myWeatherNoise.StartWeatherChange();
-        }
-        if (GUILayout.Button("StopWeatherChange"))
-        {
-            myWeatherNoise.StopWeatherChange();
-        }
-    }
-}
-#endif

@@ -1,9 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
 using Utility;
 
@@ -61,20 +58,3 @@ public class SpriteNoise : MonoBehaviour {
     }
     
 }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(SpriteNoise))]
-public class SpriteNoiseEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-
-        SpriteNoise myScriptNoise = (SpriteNoise)target;
-        if (GUILayout.Button("DrawTexture"))
-        {
-            myScriptNoise.DrawTexture();
-        }
-    }
-}
-#endif

@@ -1,8 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
 using Utility;
 
@@ -57,20 +54,3 @@ public class RandomNoise : MonoBehaviour {
         Debug.LogFormat("{0}=>{1}  spent:{2}", t1, t2, t2 - t1);
     }
 }
-
-#if UNITY_EDITOR
-[CustomEditor(typeof(RandomNoise))]
-public class RandomNoiseEditor : Editor
-{
-    public override void OnInspectorGUI()
-    {
-        DrawDefaultInspector();
-
-        RandomNoise myRandomNoise = (RandomNoise)target;
-        if (GUILayout.Button("DrawTexture"))
-        {
-            myRandomNoise.DrawTexture();
-        }
-    }
-}
-#endif
