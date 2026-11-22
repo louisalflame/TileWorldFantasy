@@ -3,6 +3,9 @@ a turn-based rogue-like  strategy game , generate random world
 
 ## Development
 
+For project handoff, architecture, completed fixes and remaining work, read
+[AGENTS.md](AGENTS.md) and [the project status](docs/PROJECT_STATUS.md).
+
 - Unity Editor: **6000.0.76f1**.
 - Open **Editor > WorldMapEditor** to configure and generate a world.
 - Biome tables use humidity, height, then temperature. Resizing preserves overlapping
