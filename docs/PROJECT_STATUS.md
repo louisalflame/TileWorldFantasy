@@ -1,6 +1,6 @@
 # TileWorldFantasy 專案現況
 
-更新日期：2026-11-23（Asia/Taipei）
+更新日期：2026-11-25（Asia/Taipei）
 
 程式基準：`6706568` — `fix: harden world generation and map persistence`
 
@@ -26,7 +26,10 @@
 | `Assets/Script/Meta/TileUnit.cs` | 單格地形、氣候、魔力、河流、生態等資料 |
 | `Assets/Script/Meta/WorldMap.cs` | 尚未完成的執行期世界骨架 |
 | `Assets/Script/Meta/Edtitor/` | 舊展示場景與仍供場景使用的 MonoBehaviour；資料夾拼字尚未整理 |
-| `Assets/Script/SaveLoad/SaveData.cs` | 存檔入口、版本格式、驗證、備份與舊格式遷移 |
+| `Assets/Script/SaveLoad/SaveData.cs` | 地圖資料類型與存檔資料驗證 |
+| `Assets/Script/SaveLoad/WorldMapLibrary.cs` | 多地圖目錄、版本 2 格式、同檔設定快照、原子寫入與備份 |
+| `Assets/Script/Meta/Editor/WorldSettingsSnapshot.cs` | 設定值與引用圖的快照、獨立副本還原與驗證 |
+| `Assets/Script/Meta/Editor/WorldMapEditor.Persistence.cs` | WorldMapEditor 的存檔列表、命名、讀寫與設定套用（partial class） |
 | `Assets/Data/` | 目前使用的世界參數、生態分布、27 種生態與色階，共 40 個設定資產 |
 | `Assets/plugin/Utility/` | 自製 Coroutine、Executor、Monad 與 Tuple 工具，與已移除的 Odin 無關 |
 | `Assets/Tests/Editor/WorldGenerationRegressionTests.cs` | Unity EditMode 回歸測試 |
@@ -75,13 +78,14 @@ Unity 內建引擎模組仍保留。
 
 ### 存檔行為
 
-- 新存檔：`Application.persistentDataPath/world-map.json`，格式版本目前為 `1`。
-- 驗證資料後先寫 `.tmp` 並 flush，完成後替換主檔；前一版保留為 `.bak`。
-- 主檔無法讀取時嘗試讀取備份，介面會說明備份回復。
+- 新存檔：`Application.persistentDataPath/Maps/<唯一ID>.json`，現行格式版本為 `2`。
+- 每個 JSON 同時包含地圖、seed、尺寸與完整生成設定快照，不拆成設定 sidecar。
+- 驗證地圖與設定後先寫 `.tmp` 並 flush，完成後替換主檔；每份地圖各自保留前一版 `.bak`。
+- 主檔的地圖或設定無法讀取時嘗試讀取備份，介面會說明備份回復。
 - 存檔失敗會回傳失敗與原因，不再顯示假的成功訊息。
 - 讀檔失敗保留編輯器目前已載入的地圖。
-- 沒有主檔與備份時，支援讀取舊 `PlayerPrefs` 的 `SAVE_KEY` 並遷移。
-  舊 preference 不會刪除；遷移寫入失敗時仍可使用讀到的有效舊資料。
+- 按使用者已確認的範圍，移除舊 JSON 與 PlayerPrefs 的讀取／遷移；舊 `world-map.json`、
+  `SAVE_KEY` 不再使用，也不會自動刪除。
 - `TileDataUnit.Populations` 是目前生成與存檔使用的人口陣列。
 
 ### 2026-11-23：外海帶與海岸過渡（本次工作目錄）
@@ -178,6 +182,28 @@ Unity 內建引擎模組仍保留。
   **71 項通過，失敗 0、略過 0**。結果為忽略的 `Logs/EditMode-preview-results.xml`、
   `Logs/EditMode-preview.log`。未新增針對簡單顯示控制的單元測試。
 - 使用者要求自行檢查介面，因此未實際操作新控制；未驗證完整打包。
+
+### 2026-11-25：回溯核對與補回多存檔（本次工作目錄）
+
+- 開始時 HEAD 為 `6741f9c`（editor enlarge），工作目錄乾淨。地形四層、固定世界尺度、
+  中文提示、濕度噪聲修正與預覽縮放均已存在；多存檔與設定快照當時不在檔案中。
+  先以全新獨立副本重新驗證，原版本 **71 項 EditMode 測試通過**。
+- 本次依使用者要求補回命名另存、覆寫目前存檔、Load 列表與開啟存檔資料夾。
+  同名另存使用不同 GUID；載入後重生仍可明確選擇覆寫同一存檔。
+- 同一份 JSON 內嵌所有生成參數、生態表與 BiomeData、預覽色階，以及巢狀／共用引用圖；
+  不依賴資產路徑或跨 Session 無效的 instance ID。快照 schema 版本 1、存檔 envelope 版本 2。
+- 生成開始時凍結設定並用獨立副本生成；完成後保存該次快照，避免生成後的參數修改與地圖錯配。
+  載入也還原可編輯的獨立副本，不覆寫原參數資產；取消／失敗／關閉時釋放生成副本。
+- 列表只讀小型 metadata 標頭，不需載入大型格子陣列；沒有額外設定或索引檔。
+  壞主檔／壞設定可回復各自的備份；僅剩備份時仍可列出並讀取。載入失敗保留目前地圖與參數。
+- 已移除舊存檔相容程式與遷移測試，保留舊格式拒絕、壞資料與備份測試。
+- 補回後於全新獨立副本使用 Unity **6000.0.76f1** 執行 `WorldGenerationRegressionTests`：
+  **77 項通過，失敗 0、略過 0**。涵蓋設定與共用引用往返、同名多檔、各自備份、
+  壞設定／壞主檔復原、僅備份列表、非法 ID、寫入失敗、舊格式拒絕、載入後重新生成、
+  原參數資產保護、載入失敗保留現況與取消生成的副本釋放。
+  結果為忽略的 `Logs/EditMode-save-restore-results.xml`、`Logs/EditMode-save-restore.log`。
+- 地形參數資產的 SHA256 在本次修改前後一致，未還原或改寫使用者的參數值。
+  未實際操作新增儲存介面，未驗證完整打包；依使用者偏好由使用者自行操作介面。
 
 ## 驗證基準與重跑方式
 

@@ -679,83 +679,212 @@ public class WorldGenerationRegressionTests
         };
     }
 
-    [Test]
-    public void Save_RoundTripsAllTileDataAndCreatesVersionedBackup()
+    private WorldGenerationSnapshot SaveSettings(int width = 1, int height = 1, int seed = 123)
     {
-        var path = Path.Combine(_directory, "map.json");
-        var storage = new MapSaveStorage(path);
-        string message;
-        Assert.That(storage.Save(SavedMap(), out message), Is.True, message);
-        Assert.That(File.ReadAllText(path), Does.Contain("\"Version\":1"));
-        var loaded = storage.Load(out message);
-        Assert.That(JsonUtility.ToJson(loaded), Is.EqualTo(JsonUtility.ToJson(SavedMap())));
-        Assert.That(storage.Save(SavedMap(2), out message), Is.True, message);
-        Assert.That(storage.Load(out message).Populations[0], Is.EqualTo(2));
-        File.WriteAllText(path, "corrupt");
-        Assert.That(storage.Load(out message).Populations[0], Is.EqualTo(1));
-        Assert.That(message, Does.Contain("backup"));
+        var window = Create<WorldMapEditor>(); window.Init();
+        Set(window, "_width", width); Set(window, "_height", height); Set(window, "_seed", seed);
+        return (WorldGenerationSnapshot)Invoke(window, "_CaptureSettings");
+    }
+
+    private static T Get<T>(object target, string name)
+    {
+        return (T)target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(target);
     }
 
     [Test]
-    public void Save_RejectsInvalidDataWithoutReplacingExistingSave()
+    public void SettingsSnapshot_RoundTripsNestedSharedReferencesWithoutAssets()
     {
-        var path = Path.Combine(_directory, "map.json");
-        var storage = new MapSaveStorage(path);
-        string error;
-        Assert.That(storage.Save(SavedMap(), out error), Is.True, error);
-        var before = File.ReadAllText(path);
-        var invalid = SavedMap();
-        invalid.Populations = new int[0];
-        Assert.That(storage.Save(invalid, out error), Is.False);
-        Assert.That(error, Is.Not.Empty);
+        WorldGenerationSnapshot snapshot;
+        using (var editable = WorldSettingsSnapshot.Restore(SaveSettings(12, 7, 456)))
+        {
+            var terrain = (TerrainParameter)editable.Roots[0];
+            terrain.WORLD_SCALE = 333f; terrain.CONTINENTS.WAVELENGTH = 77f;
+            terrain.RANDOM_POINT_GEN_PARA = ((ManaParameter)editable.Roots[3]).RANDOM_POINT_GEN_PARA;
+            terrain.RANDOM_POINT_GEN_PARA.LOCAL_AREA_SCALE = 1.23f;
+            ((TemperatureParameter)editable.Roots[2]).WEATHER_GEN_PARA = (WeatherParameter)editable.Roots[1];
+            ((PopulationParameter)editable.Roots[5]).BasicProbability = 0.75f;
+            snapshot = WorldSettingsSnapshot.Capture(456, 12, 7, editable.Roots);
+        }
+        snapshot = JsonUtility.FromJson<WorldGenerationSnapshot>(JsonUtility.ToJson(snapshot));
+        using (var restored = WorldSettingsSnapshot.Restore(snapshot))
+        {
+            var terrain = (TerrainParameter)restored.Roots[0];
+            Assert.That(terrain.WORLD_SCALE, Is.EqualTo(333f));
+            Assert.That(terrain.CONTINENTS.WAVELENGTH, Is.EqualTo(77f));
+            Assert.That(terrain.RANDOM_POINT_GEN_PARA.LOCAL_AREA_SCALE, Is.EqualTo(1.23f));
+            Assert.That(terrain.RANDOM_POINT_GEN_PARA, Is.SameAs(((ManaParameter)restored.Roots[3]).RANDOM_POINT_GEN_PARA));
+            Assert.That(((TemperatureParameter)restored.Roots[2]).WEATHER_GEN_PARA, Is.SameAs(restored.Roots[1]));
+            Assert.That(((PopulationParameter)restored.Roots[5]).BasicProbability, Is.EqualTo(0.75f));
+            Assert.That(restored.Roots.All(root => !AssetDatabase.Contains(root) && (root.hideFlags & HideFlags.NotEditable) == 0));
+            Assert.That(((BiomeDistribution)restored.Roots[6]).BiomeHumiditys[0].BiomeHeights[0].BiomeTemperatures[0], Is.Not.Null);
+        }
+    }
+
+    [Test]
+    public void MapLibrary_SameNameCreatesIndependentSingleFilesAndMetadata()
+    {
+        var library = new WorldMapLibrary(_directory);
+        string first, second, error;
+        var settings = SaveSettings();
+        Assert.That(library.SaveNew("測試地圖", SavedMap(), settings, WorldSettingsSnapshot.Validate, out first, out error), Is.True, error);
+        Assert.That(library.SaveNew("測試地圖", SavedMap(2), settings, WorldSettingsSnapshot.Validate, out second, out error), Is.True, error);
+        Assert.That(second, Is.Not.EqualTo(first));
+        Assert.That(Directory.GetFiles(_directory).Length, Is.EqualTo(2));
+        string json = File.ReadAllText(Path.Combine(_directory, first + ".json"));
+        Assert.That(json, Does.Contain("\"Version\":2").And.Contain("\"Settings\":").And.Contain("\"Data\":"));
+        var list = library.List(out error);
+        Assert.That(error, Is.Null);
+        Assert.That(list.Count, Is.EqualTo(2));
+        Assert.That(list.All(entry => entry.Metadata.Name == "測試地圖" && entry.Metadata.Seed == 123));
+        Assert.That(library.Load(first, WorldSettingsSnapshot.Validate, out error).Data.Populations[0], Is.EqualTo(1));
+        Assert.That(library.Load(second, WorldSettingsSnapshot.Validate, out error).Data.Populations[0], Is.EqualTo(2));
+    }
+
+    [Test]
+    public void MapLibrary_OverwriteKeepsIndependentBackupAndRecoversCorruptMain()
+    {
+        var library = new WorldMapLibrary(_directory);
+        string id, other, error;
+        var settings = SaveSettings();
+        Assert.That(library.SaveNew("一", SavedMap(), settings, WorldSettingsSnapshot.Validate, out id, out error), Is.True, error);
+        Assert.That(library.SaveNew("二", SavedMap(3), settings, WorldSettingsSnapshot.Validate, out other, out error), Is.True, error);
+        Assert.That(library.Overwrite(id, "一更新", SavedMap(2), settings, WorldSettingsSnapshot.Validate, out error), Is.True, error);
+        Assert.That(library.Load(id, WorldSettingsSnapshot.Validate, out error).Data.Populations[0], Is.EqualTo(2));
+        File.WriteAllText(Path.Combine(_directory, id + ".json"), "broken");
+        Assert.That(library.Load(id, WorldSettingsSnapshot.Validate, out error).Data.Populations[0], Is.EqualTo(1));
+        Assert.That(error, Does.Contain("備份"));
+        Assert.That(library.Load(other, WorldSettingsSnapshot.Validate, out error).Data.Populations[0], Is.EqualTo(3));
+    }
+
+    [Test]
+    public void MapLibrary_InvalidMapOrSettingsCannotReplaceExistingFile()
+    {
+        var library = new WorldMapLibrary(_directory);
+        string id, error;
+        var settings = SaveSettings();
+        Assert.That(library.SaveNew("原始", SavedMap(), settings, WorldSettingsSnapshot.Validate, out id, out error), Is.True, error);
+        string path = Path.Combine(_directory, id + ".json"), before = File.ReadAllText(Path.Combine(_directory, id + ".json"));
+        var invalid = SavedMap(); invalid.Populations = new int[0];
+        Assert.That(library.Overwrite(id, "壞地圖", invalid, settings, WorldSettingsSnapshot.Validate, out error), Is.False);
+        Assert.That(library.Overwrite(id, "無設定", SavedMap(), null, WorldSettingsSnapshot.Validate, out error), Is.False);
+        settings.Width = 2;
+        Assert.That(library.Overwrite(id, "錯誤尺寸", SavedMap(), settings, WorldSettingsSnapshot.Validate, out error), Is.False);
+        settings.Width = 1; settings.Nodes[0].Type = "UnknownSetting";
+        Assert.That(library.Overwrite(id, "壞設定", SavedMap(), settings, WorldSettingsSnapshot.Validate, out error), Is.False);
         Assert.That(File.ReadAllText(path), Is.EqualTo(before));
         Assert.That(File.Exists(path + ".tmp"), Is.False);
+        Assert.That(File.Exists(path + ".bak"), Is.False);
     }
 
     [Test]
-    public void Save_ReportsFilesystemFailure()
+    public void MapLibrary_BadSettingsUseBackupAndBackupOnlyFilesRemainListed()
     {
-        var blocked = Path.Combine(_directory, "blocked");
-        File.WriteAllText(blocked, "not a directory");
+        var library = new WorldMapLibrary(_directory);
+        string id, error;
+        var settings = SaveSettings();
+        Assert.That(library.SaveNew("地圖", SavedMap(), settings, WorldSettingsSnapshot.Validate, out id, out error), Is.True, error);
+        Assert.That(library.Overwrite(id, "更新", SavedMap(2), settings, WorldSettingsSnapshot.Validate, out error), Is.True, error);
+        var bad = library.Load(id, WorldSettingsSnapshot.Validate, out error);
+        bad.Settings.Nodes[0].Type = "UnknownSetting";
+        string path = Path.Combine(_directory, id + ".json");
+        File.WriteAllText(path, JsonUtility.ToJson(bad));
+        Assert.That(library.Load(id, WorldSettingsSnapshot.Validate, out error).Data.Populations[0], Is.EqualTo(1));
+        File.Delete(path);
+        Assert.That(library.List(out error).Single().Id, Is.EqualTo(id));
+        Assert.That(library.Load(id, WorldSettingsSnapshot.Validate, out error), Is.Not.Null);
+    }
+
+    [TestCase("../escape")]
+    [TestCase("other.json")]
+    public void MapLibrary_RejectsUnsafeIds(string id)
+    {
+        var library = new WorldMapLibrary(_directory);
         string error;
-        Assert.That(new MapSaveStorage(Path.Combine(blocked, "map.json")).Save(SavedMap(), out error), Is.False);
+        Assert.That(library.Overwrite(id, "地圖", SavedMap(), SaveSettings(), WorldSettingsSnapshot.Validate, out error), Is.False);
+        Assert.That(library.Load(id, WorldSettingsSnapshot.Validate, out error), Is.Null);
+        Assert.That(Directory.GetFiles(_directory), Is.Empty);
+    }
+
+    [Test]
+    public void MapLibrary_ReportsFilesystemFailureAndIgnoresOldSingleSave()
+    {
+        string blocked = Path.Combine(_directory, "blocked"); File.WriteAllText(blocked, "file");
+        string id, error;
+        Assert.That(new WorldMapLibrary(blocked).SaveNew("地圖", SavedMap(), SaveSettings(), WorldSettingsSnapshot.Validate, out id, out error), Is.False);
+        Assert.That(error, Is.Not.Empty);
+        File.WriteAllText(Path.Combine(_directory, "world-map.json"), "{\"Version\":1}");
+        Assert.That(new WorldMapLibrary(_directory).List(out error), Is.Empty);
+    }
+
+    [TestCase("{\"Version\":1,\"Data\":{}}")]
+    [TestCase("{\"Version\":999}")]
+    [TestCase("not json")]
+    public void MapLibrary_RejectsOldUnsupportedAndCorruptFormats(string json)
+    {
+        string id = Guid.NewGuid().ToString("N"), error;
+        File.WriteAllText(Path.Combine(_directory, id + ".json"), json);
+        Assert.That(new WorldMapLibrary(_directory).Load(id, WorldSettingsSnapshot.Validate, out error), Is.Null);
         Assert.That(error, Is.Not.Empty);
     }
 
     [Test]
-    public void LegacySave_MigratesToValidatedVersionedFile()
+    public void WorldEditor_SaveLoadRestoresOriginalGenerationSettingsAndCanRegenerate()
     {
-        var path = Path.Combine(_directory, "map.json");
-        var storage = new MapSaveStorage(path);
-        var json = JsonUtility.ToJson(SavedMap(3));
-        string message;
-        Assert.That(storage.MigrateLegacy(json, out message).Populations[0], Is.EqualTo(3));
-        Assert.That(message, Does.Contain("Migrated"));
-        Assert.That(storage.Load(out message).Populations[0], Is.EqualTo(3));
-        Assert.That(File.ReadAllText(path), Does.Contain("\"Version\":1"));
+        var window = Create<WorldMapEditor>(); window.Init();
+        Set(window, "_width", 19); Set(window, "_height", 13); Set(window, "_seed", 77);
+        var library = new WorldMapLibrary(_directory); Set(window, "_mapLibrary", library);
+        string originalAsset = File.ReadAllText("Assets/Data/GeneratorParameter/BasicParamTerrain.asset");
+        Drain((IEnumerator)Invoke(window, "_CreateNewWorldMonad"));
+        string originalMap = JsonUtility.ToJson(Get<TileDataUnit>(window, "_tileData"));
+        var originalTerrain = Get<TerrainParameter>(window, "_paramTerrain");
+        var modified = Object.Instantiate(originalTerrain); _objects.Add(modified);
+        modified.WORLD_SCALE += 30f; Set(window, "_paramTerrain", modified);
+        // Edited controls must not replace the snapshot that generated the map.
+        Invoke(window, "_SaveCurrentMap", false);
+        string id = Get<string>(window, "_currentSaveId");
+        Assert.That(id, Is.Not.Null, Get<string>(window, "_noticeTxt"));
+        Set(window, "_seed", 999); Set(window, "_width", 2);
+        Assert.That((bool)Invoke(window, "_LoadSavedMap", id), Is.True, Get<string>(window, "_noticeTxt"));
+        Assert.That(Get<int>(window, "_seed"), Is.EqualTo(77));
+        Assert.That(Get<int>(window, "_width"), Is.EqualTo(19));
+        Assert.That(Get<TerrainParameter>(window, "_paramTerrain").WORLD_SCALE, Is.EqualTo(originalTerrain.WORLD_SCALE));
+        Assert.That(Get<TerrainParameter>(window, "_paramTerrain"), Is.Not.SameAs(originalTerrain));
+        Drain((IEnumerator)Invoke(window, "_CreateNewWorldMonad"));
+        Assert.That(JsonUtility.ToJson(Get<TileDataUnit>(window, "_tileData")), Is.EqualTo(originalMap));
+        Assert.That(Get<string>(window, "_currentSaveId"), Is.EqualTo(id));
+        Invoke(window, "_SaveCurrentMap", true);
+        Assert.That(File.Exists(Path.Combine(_directory, id + ".json.bak")), Is.True);
+        string error; Assert.That(library.List(out error).Count, Is.EqualTo(1));
+        Assert.That(File.ReadAllText("Assets/Data/GeneratorParameter/BasicParamTerrain.asset"), Is.EqualTo(originalAsset));
     }
 
     [Test]
-    public void LegacySave_CorruptDataCannotReplaceValidSave()
+    public void WorldEditor_FailedLoadKeepsCurrentMapAndParameters()
     {
-        var path = Path.Combine(_directory, "map.json");
-        var storage = new MapSaveStorage(path);
-        string message;
-        Assert.That(storage.Save(SavedMap(), out message), Is.True);
-        Assert.That(storage.MigrateLegacy("{}", out message), Is.Null);
-        Assert.That(storage.Load(out message).Populations[0], Is.EqualTo(1));
+        var window = Create<WorldMapEditor>(); window.Init();
+        var library = new WorldMapLibrary(_directory); Set(window, "_mapLibrary", library);
+        var current = SavedMap(); Set(window, "_tileData", current);
+        var terrain = Get<TerrainParameter>(window, "_paramTerrain");
+        string id, error;
+        Assert.That(library.SaveNew("壞設定測試", SavedMap(2), SaveSettings(), WorldSettingsSnapshot.Validate, out id, out error), Is.True, error);
+        var bad = library.Load(id, WorldSettingsSnapshot.Validate, out error); bad.Settings.Nodes[0].Type = "UnknownSetting";
+        File.WriteAllText(Path.Combine(_directory, id + ".json"), JsonUtility.ToJson(bad));
+        Assert.That((bool)Invoke(window, "_LoadSavedMap", id), Is.False);
+        Assert.That(Get<TileDataUnit>(window, "_tileData"), Is.SameAs(current));
+        Assert.That(Get<TerrainParameter>(window, "_paramTerrain"), Is.SameAs(terrain));
     }
 
-    [TestCase("{\"Version\":999}")]
-    [TestCase("{\"Version\":1,\"Data\":null}")]
-    [TestCase("not json")]
-    public void Load_RejectsUnsupportedOrCorruptSaves(string contents)
+    [Test]
+    public void WorldEditor_CancelGenerationDisposesTemporarySettingsCopies()
     {
-        var path = Path.Combine(_directory, "map.json");
-        File.WriteAllText(path, contents);
-        string message;
-        Assert.That(new MapSaveStorage(path).Load(out message), Is.Null);
-        Assert.That(message, Is.Not.Empty);
+        var window = Create<WorldMapEditor>(); window.Init();
+        Set(window, "_width", 512); Set(window, "_height", 512);
+        int before = Resources.FindObjectsOfTypeAll<TerrainParameter>().Count(p => !AssetDatabase.Contains(p));
+        Invoke(window, "_CreateNewWorld");
+        Get<Utility.Coroutine>(window, "_generationCoroutine").Resume(1f / 60f);
+        Assert.That(Resources.FindObjectsOfTypeAll<TerrainParameter>().Count(p => !AssetDatabase.Contains(p)), Is.GreaterThan(before));
+        Invoke(window, "_StopGeneration");
+        Assert.That(Resources.FindObjectsOfTypeAll<TerrainParameter>().Count(p => !AssetDatabase.Contains(p)), Is.EqualTo(before));
     }
 
     [TestCase(12, 7, 9876)]
@@ -773,7 +902,7 @@ public class WorldGenerationRegressionTests
         Drain((IEnumerator)Invoke(window, "_CreateNewWorldMonad"));
         var field = typeof(WorldMapEditor).GetField("_tileData", BindingFlags.Instance | BindingFlags.NonPublic);
         var data = (TileDataUnit)field.GetValue(window);
-        MapSaveStorage.Validate(data);
+        MapSaveValidation.Validate(data);
         Assert.That(data.Map.Length, Is.EqualTo(width * height));
         var first = JsonUtility.ToJson(data);
         Drain((IEnumerator)Invoke(window, "_CreateNewWorldMonad"));

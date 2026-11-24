@@ -3,14 +3,51 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 82ec2919b2ba51447bcf466d6304ded5, type: 3}
   m_Name: BasicParamTerrain
   m_EditorClassIdentifier: 
+  USE_LAYERED_TERRAIN: 1
+  WORLD_SCALE: 512
+  CONTINENTS:
+    ENABLED: 1
+    WAVELENGTH: 100
+    OCTAVES: 4
+    LACUNARITY: 2
+    PERSISTENCE: 0.6
+  LAND_THRESHOLD: 0.45
+  CONTINENT_RELIEF: 0.9
+  BASE_LAND_HEIGHT: 0.35
+  LAND_BLEND_HEIGHT: 0.05
+  MOUNTAIN_REGIONS:
+    ENABLED: 1
+    WAVELENGTH: 100
+    OCTAVES: 2
+    LACUNARITY: 2
+    PERSISTENCE: 0.5
+  MOUNTAIN_THRESHOLD: 0.45
+  MOUNTAIN_BLEND: 0.2
+  RIDGES:
+    ENABLED: 1
+    WAVELENGTH: 32
+    OCTAVES: 4
+    LACUNARITY: 2
+    PERSISTENCE: 0.5
+  MOUNTAIN_HEIGHT: 0.5
+  RIDGE_SHARPNESS: 4
+  DETAILS:
+    ENABLED: 1
+    WAVELENGTH: 12
+    OCTAVES: 2
+    LACUNARITY: 2
+    PERSISTENCE: 0.5
+  PLAIN_DETAIL_HEIGHT: 0.015
+  MOUNTAIN_DETAIL_HEIGHT: 0.06
   SCALE: 5
   LOW_GROUND_FACTOR: 4
   HIGH_MOUNTAIN_FACTOR: 6
@@ -18,5 +55,11 @@ MonoBehaviour:
   FREQ_GROW_FACTOR: 2
   SURROUND_DOWN_OFFSET: 0.6
   SURROUND_DOWN_SPEED: 2
+  SEA_LEVEL: 0.23
+  OCEAN_FLOOR_HEIGHT: 0.05
+  OCEAN_BORDER_WIDTH: 3
+  COAST_TRANSITION_WIDTH: 20
+  COAST_NOISE_AMPLITUDE: 8
+  COAST_NOISE_SCALE: 40
   RANDOM_POINT_GEN_PARA: {fileID: 11400000, guid: 27c443291baf97844bf29d4bf4978f8c,
     type: 2}

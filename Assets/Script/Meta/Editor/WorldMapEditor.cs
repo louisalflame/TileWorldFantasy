@@ -1,10 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using Utility;
 
-public class WorldMapEditor : EditorWindow
+public partial class WorldMapEditor : EditorWindow
 {
     [MenuItem("Editor/WorldMapEditor")]
     public static WorldMapEditor OpenOrCreate()
@@ -20,8 +20,9 @@ public class WorldMapEditor : EditorWindow
     #region UnityFunction
     void OnDestroy()
     {
-        _executor.Clear();
+        _StopGeneration();
         _ReleasePreviewTexture();
+        if (_loadedSettings != null) _loadedSettings.Dispose();
     }
 
     void OnGUI()
@@ -44,7 +45,7 @@ public class WorldMapEditor : EditorWindow
         }
         catch (System.Exception e)
         {
-            _executor.Clear();
+            _StopGeneration();
             _noticeTxt = "World generation failed: " + e.Message;
             Debug.LogException(e);
         }
@@ -146,7 +147,7 @@ public class WorldMapEditor : EditorWindow
     private TileDataUnit _tileData = null;
     private Executor _executor = new Executor();
 
-    //Create 
+    //Create
     private ITerrainGenerator _terrainGen = new TerrainGenerator();
     private ITemperatureGenerator _temperatureGen = new TemperatureGenerator();
     private IWeatherGenerator _humidityGen = new WeatherGenerator();
@@ -156,6 +157,10 @@ public class WorldMapEditor : EditorWindow
 
     public void Init()
     {
+        _StopGeneration();
+        if (_loadedSettings != null) { _loadedSettings.Dispose(); _loadedSettings = null; }
+        _generatedSettings = null;
+        _currentSaveId = null;
         _paramTerrain = (TerrainParameter)AssetDatabase.LoadAssetAtPath(_terrainParamPath, typeof(TerrainParameter));
         _paramWeather = (WeatherParameter)AssetDatabase.LoadAssetAtPath(_weatherParamPath, typeof(WeatherParameter));
         _paramTemperature = (TemperatureParameter)AssetDatabase.LoadAssetAtPath(_temperatureParamPath, typeof(TemperatureParameter));
@@ -187,7 +192,7 @@ public class WorldMapEditor : EditorWindow
         _noticeTxt = string.Empty;
         _ReleasePreviewTexture();
         _tileData = null;
-        _executor.Clear();
+        _StopGeneration();
     }
     #endregion
 
@@ -363,34 +368,11 @@ public class WorldMapEditor : EditorWindow
         if (GUILayout.Button("Save"))
         {
             _newMapStatus = NewMapStatus.Save;
-            if (_tileData != null)
-            {
-                string error;
-                _noticeTxt = SaveData.SaveMap(_tileData, out error)
-                    ? "Map saved successfully."
-                    : "Map save failed: " + error;
-            }
-            else
-            {
-                _noticeTxt = "Error! No map to saved";
-            }
         }
         if (GUILayout.Button("Load"))
         {
             _newMapStatus = NewMapStatus.Load;
-            string message;
-            var loaded = SaveData.LoadMap(out message);
-            if (loaded != null)
-            {
-                _tileData = loaded;
-                _ReleasePreviewTexture();
-                _previewScroll = Vector2.zero;
-                _noticeTxt = "Map loaded successfully. " + message;
-            }
-            else
-            {
-                _noticeTxt = "Map load failed: " + message;
-            }
+            _RefreshSaveList();
         }
 
     }
@@ -554,8 +536,10 @@ public class WorldMapEditor : EditorWindow
             case NewMapStatus.Create:
                 break;
             case NewMapStatus.Save:
+                _DrawSaveMap();
                 break;
             case NewMapStatus.Load:
+                _DrawLoadMaps();
                 break;
         }
     }
@@ -668,7 +652,8 @@ public class WorldMapEditor : EditorWindow
         if (_paramTerrain == null) return;
         _showCoastParameters = EditorGUILayout.Foldout(_showCoastParameters, "地形分層與外海設定", true);
         if (!_showCoastParameters) return;
-        EditorGUILayout.HelpBox("以下欄位會編輯目前指定的地形參數資產，支援復原。分層波長與海岸寬度除以 WORLD SCALE 就是地圖比例；" +
+        EditorGUILayout.HelpBox((AssetDatabase.Contains(_paramTerrain) ? "以下欄位會編輯目前指定的地形參數資產，支援復原。" :
+            "目前編輯的是載入設定的獨立副本，不會覆寫原參數資產。") + "分層波長與海岸寬度除以 WORLD SCALE 就是地圖比例；" +
             "只改地圖長寬可提高同一世界的解析度。" +
             "生態高度分段、預覽色階與河流終點仍需另行設定。將滑鼠停在欄位標籤上可查看中文說明。", MessageType.Info);
         using (var settings = new SerializedObject(_paramTerrain))
@@ -721,117 +706,126 @@ public class WorldMapEditor : EditorWindow
 
     private void _CreateNewWorld()
     {
-        _executor.Clear();
+        _StopGeneration();
         var monad = new BlockMonad<None>(r => _CreateNewWorldMonad());
-        _executor.Add(monad.Do());
+        _generationCoroutine = new Utility.Coroutine(monad.Do());
+        _executor.Add(_generationCoroutine);
     }
 
     private IEnumerator _CreateNewWorldMonad()
     {
-        Random.InitState(_seed);
-
-        var genTerrainMonad = new BlockMonad<float[]>(r =>
-             _terrainGen.GenerateHeightMap(
-                 _width,
-                 _height,
-                 Random.Range(0, 10000),
-                 Random.Range(0, 10000),
-                 _paramTerrain,
-                 r));
-        var genHumidityMonad = new BlockMonad<float[]>(r =>
-            _humidityGen.GenerateWeatherMap(
-                _width,
-                _height,
-                Random.Range(0, 10000),
-                Random.Range(0, 10000),
-                _paramWeather,
-                r));
-        var genTemperatureMonad = new BlockMonad<float[]>(r =>
-            _temperatureGen.GenerateWeatherMap(
-                _width,
-                _height,
-                Random.Range(0, 10000),
-                Random.Range(0, 10000),
-                _paramTemperature,
-                r));
-        var genManaMonad = new BlockMonad<float[]>(r =>
-            _manaGen.GenerateManaMap(
-                _width,
-                _height, 
-                _paramMana,
-                r));
-
-        Debug.Log("start genTerrainMonad");
-        yield return genTerrainMonad.Do();
-        Debug.Log("start genHumidityMonad");
-        yield return genHumidityMonad.Do();
-        Debug.Log("start genTemperatureMonad");
-        yield return genTemperatureMonad.Do();
-        Debug.Log("start genManaMonad");
-        yield return genManaMonad.Do();
-
-        var terrainMap = genTerrainMonad.Result;
-        var humidityMap = genHumidityMonad.Result;
-        var temperatureMap = genTemperatureMonad.Result;
-        var manaMap = genManaMonad.Result;
-
-        var genRiverMonad = new BlockMonad<float[]>(r =>
-            _riverGen.GenerateRiverMap(
-                _width,
-                _height,
-                terrainMap,
-                _paramRain,
-                r));
-        Debug.Log("start genRiverMonad");
-        yield return genRiverMonad.Do();
-        var riverMap = genRiverMonad.Result;
-
-        var tileUnitMap = new TileUnit[_width * _height];
-
-        IBiomeIdentifier identifier = new BasicBiomeIdentifier(_biomeDistribution);
-        for (int x = 0; x < _width; x++)
+        var captured = _CaptureSettings();
+        using (var generationSettings = WorldSettingsSnapshot.Restore(captured))
         {
-            for (int y = 0; y < _height; y++)
+            int mapWidth = captured.Width, mapHeight = captured.Height, mapSeed = captured.Seed;
+            Random.InitState(mapSeed);
+
+            var genTerrainMonad = new BlockMonad<float[]>(r =>
+                 _terrainGen.GenerateHeightMap(
+                     mapWidth,
+                     mapHeight,
+                     Random.Range(0, 10000),
+                     Random.Range(0, 10000),
+                     (TerrainParameter)generationSettings.Roots[0],
+                     r));
+            var genHumidityMonad = new BlockMonad<float[]>(r =>
+                _humidityGen.GenerateWeatherMap(
+                    mapWidth,
+                    mapHeight,
+                    Random.Range(0, 10000),
+                    Random.Range(0, 10000),
+                    (WeatherParameter)generationSettings.Roots[1],
+                    r));
+            var genTemperatureMonad = new BlockMonad<float[]>(r =>
+                _temperatureGen.GenerateWeatherMap(
+                    mapWidth,
+                    mapHeight,
+                    Random.Range(0, 10000),
+                    Random.Range(0, 10000),
+                    (TemperatureParameter)generationSettings.Roots[2],
+                    r));
+            var genManaMonad = new BlockMonad<float[]>(r =>
+                _manaGen.GenerateManaMap(
+                    mapWidth,
+                    mapHeight,
+                    (ManaParameter)generationSettings.Roots[3],
+                    r));
+
+            Debug.Log("start genTerrainMonad");
+            yield return genTerrainMonad.Do();
+            Debug.Log("start genHumidityMonad");
+            yield return genHumidityMonad.Do();
+            Debug.Log("start genTemperatureMonad");
+            yield return genTemperatureMonad.Do();
+            Debug.Log("start genManaMonad");
+            yield return genManaMonad.Do();
+
+            var terrainMap = genTerrainMonad.Result;
+            var humidityMap = genHumidityMonad.Result;
+            var temperatureMap = genTemperatureMonad.Result;
+            var manaMap = genManaMonad.Result;
+
+            var genRiverMonad = new BlockMonad<float[]>(r =>
+                _riverGen.GenerateRiverMap(
+                    mapWidth,
+                    mapHeight,
+                    terrainMap,
+                    (RainParameter)generationSettings.Roots[4],
+                    r));
+            Debug.Log("start genRiverMonad");
+            yield return genRiverMonad.Do();
+            var riverMap = genRiverMonad.Result;
+
+            var tileUnitMap = new TileUnit[mapWidth * mapHeight];
+
+            IBiomeIdentifier identifier = new BasicBiomeIdentifier((BiomeDistribution)generationSettings.Roots[6]);
+            for (int x = 0; x < mapWidth; x++)
             {
-                var idx = MathUtility.MapIndex(x, y, _height);
+                for (int y = 0; y < mapHeight; y++)
+                {
+                    var idx = MathUtility.MapIndex(x, y, mapHeight);
 
-                var height = terrainMap[idx];
-                var humidity = humidityMap[idx];
-                var temperature = temperatureMap[idx];
-                var mana = manaMap[idx];
-                var river = riverMap[idx];
-                
-                BiomeData biome = identifier.IdentifyBiome(humidity, height, temperature);
-                tileUnitMap[idx] = new TileUnit(
-                    height,
-                    humidity,
-                    temperature,
-                    mana,
-                    river,
-                    biome.Biome);
+                    var height = terrainMap[idx];
+                    var humidity = humidityMap[idx];
+                    var temperature = temperatureMap[idx];
+                    var mana = manaMap[idx];
+                    var river = riverMap[idx];
+
+                    BiomeData biome = identifier.IdentifyBiome(humidity, height, temperature);
+                    tileUnitMap[idx] = new TileUnit(
+                        height,
+                        humidity,
+                        temperature,
+                        mana,
+                        river,
+                        biome.Biome);
+                }
             }
+
+            var genPopulationMonad = new BlockMonad<int[]>(r =>
+                _populationGen.GeneratePopulationMap(
+                    mapWidth,
+                    mapHeight,
+                    tileUnitMap,
+                    identifier,
+                    (PopulationParameter)generationSettings.Roots[5],
+                    r));
+            Debug.Log("start genPopulationMonad");
+            yield return genPopulationMonad.Do();
+            var populationMap = genPopulationMonad.Result;
+
+            _tileData = new TileDataUnit
+            {
+                Map = tileUnitMap,
+                Populations = populationMap,
+                Width = mapWidth,
+                Height = mapHeight,
+            };
+            _noticeTxt = "New world created.";
+            _generatedSettings = captured;
+            if (string.IsNullOrEmpty(_currentSaveId)) _saveName = "地圖 " + mapSeed;
+            _ReleasePreviewTexture();
         }
-
-        var genPopulationMonad = new BlockMonad<int[]>(r =>
-            _populationGen.GeneratePopulationMap(
-                _width,
-                _height,
-                tileUnitMap,
-                identifier,
-                _paramPopulation,
-                r));
-        Debug.Log("start genPopulationMonad");
-        yield return genPopulationMonad.Do();
-        var populationMap = genPopulationMonad.Result;
-
-        _tileData = new TileDataUnit
-        {
-            Map = tileUnitMap,
-            Populations = populationMap,
-            Width = _width,
-            Height = _height,
-        };
-        _noticeTxt = "New world created.";
     }
     #endregion
 

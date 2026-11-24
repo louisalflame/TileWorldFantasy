@@ -77,18 +77,32 @@ or change its resolution. Control tooltips are in Traditional Chinese.
 
 ## Saved maps
 
-Maps are stored as versioned JSON in `Application.persistentDataPath/world-map.json`.
-Saving validates the map and flushes a temporary file before replacing the current
-save. The previous save is kept as `world-map.json.bak`; loading falls back to that
-backup if the main file is invalid. Save/load errors appear in the world editor.
+In **New Map > Save**, enter a name and choose **另存新地圖** or **覆寫目前存檔**.
+Each map is one version 2 JSON file under `Application.persistentDataPath/Maps/`,
+with a unique ID as its filename. Identical display names create independent saves.
+**Load** lists names, dimensions, seeds and save times; choose **載入地圖與設定**.
+Both screens provide **開啟存檔資料夾**.
 
-If no save file or backup exists, the legacy `SAVE_KEY` PlayerPrefs map can be loaded
-and migrated. The legacy preference is retained if migration fails or succeeds.
+The same JSON contains the map result, seed, dimensions, generation version, all
+generator parameters, shared/nested settings, biome tables and preview colors.
+Settings are frozen when generation starts. Editing controls after generating does
+not change the saved snapshot: regenerate first to apply those edits to a new map.
+
+Loading restores independent editable parameter copies and does not overwrite project
+assets. Adjust them, regenerate, then overwrite the current save or create another.
+Each save keeps its own `.bak`; invalid map data or settings trigger backup recovery.
+Writes validate first, then flush a temporary file before replacing the main file.
+Failed loads keep the current map and settings. The file header allows listing saves
+without reading all tile data; no separate settings or index file is needed.
+
+The old `world-map.json` and `SAVE_KEY` PlayerPrefs formats are no longer supported,
+as requested. Existing old files/preferences are left untouched and are not listed.
 
 ## Regression tests
 
 Run `WorldGenerationRegressionTests` as EditMode tests in Unity's Test Runner.
 The tests cover rectangular rivers, generation boundaries, preserving biome and
-population settings when resizing, mana point counts, save validation, backups,
-legacy migration, and reproducible rectangular worlds using the bundled assets.
+population settings when resizing, mana point counts, multiple saves, settings
+round trips, backups, asset protection and reproducible rectangular worlds using
+the bundled assets. Old-format saves are explicitly rejected.
 File tests use temporary directories and do not overwrite normal saved maps.
